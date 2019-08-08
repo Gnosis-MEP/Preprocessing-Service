@@ -34,7 +34,7 @@ def main():
     # frame_skip_n = 5
     source = sys.argv[1]
     fps = int(sys.argv[2])
-    buffer_stream_key = sys.argv[1]
+    buffer_stream_key = sys.argv[3]
 
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
     try:

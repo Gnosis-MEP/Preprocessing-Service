@@ -33,13 +33,34 @@ class TestPreprocessing(MockedServiceStreamTestCase):
         event_msg_tuple = prepare_event_msg_tuple({
             'action': 'startPreprocessing',
             'source': 'source',
-            'resolution': 'resolution',
+            'resolution': '640×480',
             'fps': '15',
             'buffer_stream_key': 'buffer_stream_key',
         })
         self.service.service_stream.mocked_values = [event_msg_tuple]
         self.service.process_events()
         self.assertTrue(self.service._run_subprocess.called)
+
+    @patch('preprocessing.service.PreProcessing._run_subprocess')
+    def test_process_action_stop_preprocessing_for_buffer_stream_kill_sub_process(self, mocked_run_sub_process):
+        event_msg_tuple = prepare_event_msg_tuple({
+            'action': 'startPreprocessing',
+            'source': 'source',
+            'resolution': '640×480',
+            'fps': '15',
+            'buffer_stream_key': 'buffer_stream_key',
+        })
+        self.service.service_stream.mocked_values = [event_msg_tuple]
+        self.service.process_events()
+
+        event_msg_tuple = prepare_event_msg_tuple({
+            'action': 'stopPreprocessing',
+            'buffer_stream_key': 'buffer_stream_key',
+        })
+        self.service.service_stream.mocked_values = [event_msg_tuple]
+        self.service.process_events()
+        self.assertEqual(1, len((mocked_run_sub_process.return_value.method_calls)))
+        self.assertIn('kill', str(mocked_run_sub_process.return_value.method_calls[0]))
 
     def test_process_cmd_(self):
         pass

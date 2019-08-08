@@ -2,7 +2,7 @@ import subprocess
 import threading
 
 from event_service_utils.services.base import BaseService
-from event_service_utils.schemas.events import BaseEventMessage
+# from event_service_utils.schemas.events import BaseEventMessage
 from event_service_utils.schemas.internal_msgs import (
     BaseInternalMessage,
 )
@@ -34,11 +34,11 @@ class PreProcessing(BaseService):
         self.buffers = {}
 
     def _run_subprocess(self, *args):
-        p = subprocess.Popen(args)
+        self.logger.debug(f'Starting subprocess with args: {args}')
+        p = subprocess.Popen(*args)
         return p
 
     def start_preprocessing_for_buffer_stream(self, source, resolution, fps, buffer_stream_key):
-        # import ipdb; ipdb.set_trace()
         # source = 'rtmp://localhost/live/mystream'
         # frame_skip_n = 5
         # url, frame_skip_n = action.split('-')
@@ -82,32 +82,13 @@ class PreProcessing(BaseService):
             fps = event_data['fps']
             buffer_stream_key = event_data['buffer_stream_key']
             self.start_preprocessing_for_buffer_stream(source, resolution, fps, buffer_stream_key)
-            pass
         elif action == 'stopPreprocessing':
-            pass
-            # self.start_new_preprocessing_action(action)
-
-        # if action in ['subJoin', 'subLeave']:
-        #     event_schema = MatchingEngineUpdateSubscriberMessage(json_msg=json_msg)
-        #     event_data = event_schema.object_load_from_msg()
-        #     if action == 'subJoin':
-        #         self.add_subscriber(event_data['uid'], event_data['sub_id'], event_data['subscription'])
-        #     elif action == 'subLeave':
-        #         self.rm_subscriber(event_data['uid'])
-
-    # def _log_dict(self, dict_name, dict):
-    #     log_msg = f'- {dict_name}:'
-    #     for k, v in dict.items():
-    #         log_msg += f'\n-- {k}  ---  {v}'
-    #     self.logger.debug(log_msg)
+            buffer_stream_key = event_data['buffer_stream_key']
+            self.stop_preprocessing_for_buffer_stream(buffer_stream_key)
 
     def log_state(self):
         super(PreProcessing, self).log_state()
         self._log_dict('Buffers', self.buffers)
-        # self._log_dict('Subscribers', self.subscribers)
-        # self.logger.debug('Current Windows:')
-        # for window in self.subscription_windows.values():
-        #     window.log_status(self.logger)
 
     def run(self):
         super(PreProcessing, self).run()

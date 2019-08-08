@@ -31,22 +31,19 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
         )
 
     def next_event(self):
-        # print('new frame')
-        # [self.reader.grab() * 10]
-        for i in range(self.frame_skip_n + 1):
-            self.reader.grab()
-        ret, frame = self.reader.retrieve()
-        # ret, frame = self.reader.read()
+        if self.reader.isOpened():
+            for i in range(self.frame_skip_n + 1):
+                self.reader.grab()
+            ret, frame = self.reader.retrieve()
+            if ret:
+                cv2.imshow(f'{self.media_source}-{self.frame_skip_n}', frame)
+                cv2.waitKey(1)
+                pil_img = Image.fromarray(frame[:, :, ::-1].copy())
 
-        if ret:
-            cv2.imshow(f'{self.media_source}-{self.frame_skip_n}', frame)
-            cv2.waitKey(1)
-            pil_img = Image.fromarray(frame[:, :, ::-1].copy())
+                event_id = f'{self.source}-{str(uuid.uuid4())}'
+                obj_data = self.upload_inmemory_to_storage(pil_img)
+                # print(obj_data)
 
-            event_id = f'{self.source}-{str(uuid.uuid4())}'
-            obj_data = self.upload_inmemory_to_storage(pil_img)
-            # print(obj_data)
-
-            img_url = obj_data
-            schema = self.event_schema(id=event_id, vekg={}, image_url=img_url, source=self.source)
-            return schema.json_msg_load_from_dict()
+                img_url = obj_data
+                schema = self.event_schema(id=event_id, vekg={}, image_url=img_url, source=self.source)
+                return schema.json_msg_load_from_dict()
