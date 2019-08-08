@@ -10,8 +10,6 @@ from preprocessing.conf import (
     REDIS_ADDRESS,
     REDIS_PORT,
     USER_MANAGER_STREAM_KEY,
-    PREPROCESSING_STREAM_KEY,
-    PREPROCESSING_CMD_KEY,
     MINIO_ACCESS_KEY,
     MINIO_SECRET_KEY,
     MINIO_ENDPOINT,
@@ -19,16 +17,15 @@ from preprocessing.conf import (
 )
 
 
-def run_publisher(user_id, stream_factory, um_stream_key, media_source, frame_skip_n):
+def run_stream_to_buffer(buffer_stream_key, stream_factory, um_stream_key, media_source, fps):
     minio_fs_cli_config = {
         'endpoint': MINIO_ENDPOINT,
         'access_key': MINIO_ACCESS_KEY,
         'secret_key': MINIO_SECRET_KEY,
         'secure': MINIO_SECURE_CONNECTION,
     }
-    # event_generator = ImageRedisCacheFromMpeg4EventGenerator(redis_fs_cli_config, media_source, user_id)
-    event_generator = ImageUploadFromRTMPEventGenerator(minio_fs_cli_config, media_source, user_id, frame_skip_n)
-    pub = Publisher(user_id, stream_factory, um_stream_key, event_generator)
+    event_generator = ImageUploadFromRTMPEventGenerator(minio_fs_cli_config, media_source, buffer_stream_key, fps)
+    pub = Publisher(buffer_stream_key, stream_factory, um_stream_key, event_generator)
     pub.start()
 
 
@@ -36,13 +33,12 @@ def main():
     # source = 'rtmp://localhost/live/mystream'
     # frame_skip_n = 5
     source = sys.argv[1]
-    frame_skip_n = int(sys.argv[2])
+    fps = int(sys.argv[2])
+    buffer_stream_key = sys.argv[1]
 
-    publisher_cleanup = source.replace('/', '-').replace(':', '-')
-    user_id = f'{publisher_cleanup}-skip{frame_skip_n}'
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
     try:
-        run_publisher(user_id, stream_factory, USER_MANAGER_STREAM_KEY, source, frame_skip_n)
+        run_stream_to_buffer(buffer_stream_key, stream_factory, USER_MANAGER_STREAM_KEY, source, fps)
     except KeyboardInterrupt:
         pass
 

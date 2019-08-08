@@ -1,62 +1,65 @@
 import subprocess
 import threading
 
-import uuid
-import re
-
+from event_service_utils.services.base import BaseService
 from event_service_utils.schemas.events import BaseEventMessage
 from event_service_utils.schemas.internal_msgs import (
     BaseInternalMessage,
-    MatchingEngineUpdateSubscriberMessage,
 )
-
-from preprocessing.base import BaseService
-# from preprocessing.publishers import run_publisher
 
 
 class PreProcessing(BaseService):
     def __init__(self,
                  service_stream_key, service_cmd_key,
                  um_stream_key,
-                 run_publishers_bin,
-                 stream_factory):
+                 stream_to_buffers_bin,
+                 stream_factory,
+                 logging_level):
 
         super(PreProcessing, self).__init__(
             name=self.__class__.__name__,
             service_stream_key=service_stream_key,
             service_cmd_key=service_cmd_key,
             cmd_event_schema=BaseInternalMessage,
-            stream_factory=stream_factory
+            stream_factory=stream_factory,
+            logging_level=logging_level
         )
 
-        self.run_publishers_bin = run_publishers_bin
+        self.stream_to_buffers_bin = stream_to_buffers_bin
         self.stream_factory = stream_factory
         self.um_stream_key = um_stream_key
         self.service_stream = self.stream_factory.create(service_stream_key)
         self.service_cmd = self.stream_factory.create(service_cmd_key, stype='streamOnly')
 
-        self.publishers = {}
+        self.buffers = {}
 
-    def run_virtual_publisher_process(self, action):
+    def _run_subprocess(self, *args):
+        p = subprocess.Popen(args)
+        return p
+
+    def start_preprocessing_for_buffer_stream(self, source, resolution, fps, buffer_stream_key):
         # import ipdb; ipdb.set_trace()
-        url = 'rtmp://localhost/live/mystream'
-        frame_skip_n = 5
-        url, frame_skip_n = action.split('-')
-        # publisher_cleanup = url.replace('/', '-').replace(':', '-')
-        # user_id = f'{publisher_cleanup}-skip{frame_skip_n}'
-        # self.publisher_thread = threading.Thread(
-        #     target=run_publisher,
-        #     args=(user_id, self.stream_factory, self.um_stream_key, url, frame_skip_n)
-        # )
-        # self.publishers[url] = True
-        # self.publisher_thread.start()
-        # self.publisher_thread.join()
-        # p1 = subprocess.Process(
-        #     target=run_publisher,
-        #     args=(user_id, self.stream_factory, self.um_stream_key, url, frame_skip_n)
-        # )
-        p = subprocess.Popen(['python', self.run_publishers_bin, url, str(frame_skip_n)])
-        print(p)
+        # source = 'rtmp://localhost/live/mystream'
+        # frame_skip_n = 5
+        # url, frame_skip_n = action.split('-')
+
+        preprocessing_data = {
+            'source': source,
+            'resolution': resolution,
+            'fps': fps,
+            'buffer_stream_key': buffer_stream_key,
+        }
+        self.logger.info(f'Starting preprocessing for: {buffer_stream_key}. Buffer data: {preprocessing_data}')
+        p = self._run_subprocess(['python', self.stream_to_buffers_bin, source, str(fps), buffer_stream_key])
+        preprocessing_data['subprocess'] = p
+        self.buffers.update({buffer_stream_key: preprocessing_data})
+
+    def stop_preprocessing_for_buffer_stream(self, buffer_stream_key):
+        preprocessing_data = self.buffers.get(buffer_stream_key, None)
+        if preprocessing_data:
+            self.logger.info(f'Stoping preprocessing for: {buffer_stream_key}. Buffer data: {preprocessing_data}')
+            subprocess = preprocessing_data['subprocess']
+            subprocess.kill()
 
     def process_events(self):
         self.logger.debug('Processing EVENTS..')
@@ -64,14 +67,25 @@ class PreProcessing(BaseService):
             return
         event_list = self.service_stream.read_events(count=1)
         for event_tuple in event_list:
-            msg_id, json_msg = event_tuple
-            event_schema = BaseEventMessage(json_msg=json_msg)
+            event_id, json_msg = event_tuple
+            event_schema = self.cmd_event_schema(json_msg=json_msg)
             event_data = event_schema.object_load_from_msg()
+            action = event_data['action']
+            self.process_action(action, event_data, json_msg)
+            self.log_state()
 
     def process_action(self, action, event_data, json_msg):
         super(PreProcessing, self).process_action(action, event_data, json_msg)
-        if len(self.publishers) == 0:
-            self.run_virtual_publisher_process(action)
+        if action == 'startPreprocessing':
+            source = event_data['source']
+            resolution = event_data['resolution']
+            fps = event_data['fps']
+            buffer_stream_key = event_data['buffer_stream_key']
+            self.start_preprocessing_for_buffer_stream(source, resolution, fps, buffer_stream_key)
+            pass
+        elif action == 'stopPreprocessing':
+            pass
+            # self.start_new_preprocessing_action(action)
 
         # if action in ['subJoin', 'subLeave']:
         #     event_schema = MatchingEngineUpdateSubscriberMessage(json_msg=json_msg)
@@ -81,14 +95,15 @@ class PreProcessing(BaseService):
         #     elif action == 'subLeave':
         #         self.rm_subscriber(event_data['uid'])
 
-    def _log_dict(self, dict_name, dict):
-        log_msg = f'- {dict_name}:'
-        for k, v in dict.items():
-            log_msg += f'\n-- {k}  ---  {v}'
-        self.logger.debug(log_msg)
+    # def _log_dict(self, dict_name, dict):
+    #     log_msg = f'- {dict_name}:'
+    #     for k, v in dict.items():
+    #         log_msg += f'\n-- {k}  ---  {v}'
+    #     self.logger.debug(log_msg)
 
     def log_state(self):
         super(PreProcessing, self).log_state()
+        self._log_dict('Buffers', self.buffers)
         # self._log_dict('Subscribers', self.subscribers)
         # self.logger.debug('Current Windows:')
         # for window in self.subscription_windows.values():
@@ -96,10 +111,10 @@ class PreProcessing(BaseService):
 
     def run(self):
         super(PreProcessing, self).run()
-        self.cmd_thread = threading.Thread(target=self.run_forever, args=(self.process_cmd,))
+        # self.cmd_thread = threading.Thread(target=self.run_forever, args=(self.process_cmd,))
         self.event_thread = threading.Thread(target=self.run_forever, args=(self.process_events,))
         # self.run_virtual_publisher_thread()
-        self.cmd_thread.start()
+        # self.cmd_thread.start()
         self.event_thread.start()
-        self.cmd_thread.join()
+        # self.cmd_thread.join()
         self.event_thread.join()

@@ -11,7 +11,6 @@ name = "sit-git"
 [dev-packages]
 ipython = "*"
 ipdb = "*"
-bumpversion = "*"
 flake8 = "*"
 
 [packages]
@@ -20,7 +19,7 @@ opencv-python = "==4.0.0.21"
 imageio = "==2.4.1"
 python-decouple = "==3.1"
 logzero = "==1.5.0"
-event-service-utils = "==0.2.0"
+event-service-utils = "==0.3.2"
 minio = "==4.0.11"
 
 [requires]
