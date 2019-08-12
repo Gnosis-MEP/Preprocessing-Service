@@ -14,12 +14,14 @@ from event_service_utils.event_generators_processors.img_based import (
 
 
 class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
-    def __init__(self, file_storage_cli_config, media_source, source, frame_skip_n=0):
+    def __init__(self, file_storage_cli_config, media_source, source, fps=60):
         self.file_storage_cli_config = file_storage_cli_config
         self.initialize_file_storage_client()
         self.media_source = media_source
+        self.fps = fps
+        # import ipdb; ipdb.set_trace()
         self.reader = cv2.VideoCapture(media_source)
-        self.frame_skip_n = frame_skip_n
+        # self.reader.set(cv2.CAP_PROP_FPS, float(self.fps))
 
         BaseEventGenerator.__init__(
             self, source=source, event_schema=EventVEkgMessage)
@@ -32,16 +34,24 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
 
     def next_event(self):
         if self.reader.isOpened():
-            for i in range(self.frame_skip_n + 1):
-                self.reader.grab()
+            # for i in range(self.frame_skip_n + 1):
+            #     self.reader.grab()
+            self.reader.grab()
             ret, frame = self.reader.retrieve()
+            while not ret:
+                # self.reader.grab()
+                # time.sleep(0.05)
+                ret, frame = self.reader.read()
+
             if ret:
-                cv2.imshow(f'{self.media_source}-{self.frame_skip_n}', frame)
+                cv2.imshow(f'{self.media_source}-{self.fps}', frame)
                 cv2.waitKey(1)
+                print("new frame")
                 pil_img = Image.fromarray(frame[:, :, ::-1].copy())
 
                 event_id = f'{self.source}-{str(uuid.uuid4())}'
-                obj_data = self.upload_inmemory_to_storage(pil_img)
+                # obj_data = self.upload_inmemory_to_storage(pil_img)
+                obj_data = ''
                 # print(obj_data)
 
                 img_url = obj_data
