@@ -19,7 +19,7 @@ class TestPreprocessing(MockedServiceStreamTestCase):
         'service_cmd_key': PREPROCESSING_CMD_KEY,
         'um_stream_key': USER_MANAGER_STREAM_KEY,
         'stream_to_buffers_bin': RUN_STREAM_TO_BUFFERS,
-        'logging_level': 'DEBUG'
+        'logging_level': 'ERROR'
     }
     SERVICE_CLS = PreProcessing
     MOCKED_STREAMS_DICT = {
@@ -74,9 +74,7 @@ class TestPreprocessing(MockedServiceStreamTestCase):
         self.service.service_stream.mocked_values = [event_msg_tuple]
         self.service.process_events()
 
-        import ipdb; ipdb.set_trace()
-        self.assertTrue(self.service._run_subprocess.called)
-
+        start_proc_mock.assert_called_once_with('source', '640×480', '15', 'buffer_stream_key')
 
     def test_process_events_(self):
         pass
