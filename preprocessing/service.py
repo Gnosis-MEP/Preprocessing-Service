@@ -33,6 +33,10 @@ class PreProcessing(BaseService):
 
         self.buffers = {}
 
+    def _prepare_subprocess_arglist(self, source, resolution, fps, buffer_stream_key):
+        width, height = resolution.split('x')
+        return ['python', self.stream_to_buffers_bin, source, width, height, str(fps), buffer_stream_key]
+
     def _run_subprocess(self, *args):
         self.logger.debug(f'Starting subprocess with args: {args}')
         p = subprocess.Popen(*args)
@@ -50,7 +54,8 @@ class PreProcessing(BaseService):
             'buffer_stream_key': buffer_stream_key,
         }
         self.logger.info(f'Starting preprocessing for: {buffer_stream_key}. Buffer data: {preprocessing_data}')
-        p = self._run_subprocess(['python', self.stream_to_buffers_bin, source, str(fps), buffer_stream_key])
+        arg_list = self._prepare_subprocess_arglist(source, resolution, fps, buffer_stream_key)
+        p = self._run_subprocess(arg_list)
         preprocessing_data['subprocess'] = p
         self.buffers.update({buffer_stream_key: preprocessing_data})
 

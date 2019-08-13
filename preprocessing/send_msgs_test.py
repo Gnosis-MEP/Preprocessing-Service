@@ -30,15 +30,33 @@ def send_msgs(service_stream):
         'startPreprocessing',
         {
             'source': 'rtmp://localhost/live/mystream',
-            'resolution': '640×480',
+            'resolution': '640x480',
             'fps': '3',
-            'buffer_stream_key': 'buffer-stream-key',
+            'buffer_stream_key': 'buffer-stream-key1',
         }
     )
     msg_2 = new_action_msg(
+        'startPreprocessing',
+        {
+            'source': 'rtmp://localhost/live/mystream',
+            'resolution': '320x240',
+            'fps': '15',
+            'buffer_stream_key': 'buffer-stream-key2',
+        }
+    )
+    msg_3 = new_action_msg(
+        'startPreprocessing',
+        {
+            'source': 'rtmp://localhost/live/mystream',
+            'resolution': '640x480',
+            'fps': '30',
+            'buffer_stream_key': 'buffer-stream-key3',
+        }
+    )
+    msg_4 = new_action_msg(
         'stopPreprocessing',
         {
-            'buffer_stream_key': 'buffer-stream-key',
+            'buffer_stream_key': 'buffer-stream-key1',
         }
     )
     import ipdb; ipdb.set_trace()
@@ -46,7 +64,11 @@ def send_msgs(service_stream):
     service_stream.write_events(msg_1)
     print(f'Sending msg {msg_2}')
     service_stream.write_events(msg_2)
-
+    print(f'Sending msg {msg_3}')
+    service_stream.write_events(msg_3)
+    import ipdb; ipdb.set_trace()
+    print(f'Sending msg {msg_4}')
+    service_stream.write_events(msg_4)
 
 def main():
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
