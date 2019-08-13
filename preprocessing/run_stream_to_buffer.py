@@ -17,14 +17,15 @@ from preprocessing.conf import (
 )
 
 
-def run_stream_to_buffer(buffer_stream_key, stream_factory, um_stream_key, media_source, fps):
+def run_stream_to_buffer(stream_factory, um_stream_key, media_source, width, height, fps, buffer_stream_key, ):
     minio_fs_cli_config = {
         'endpoint': MINIO_ENDPOINT,
         'access_key': MINIO_ACCESS_KEY,
         'secret_key': MINIO_SECRET_KEY,
         'secure': MINIO_SECURE_CONNECTION,
     }
-    event_generator = ImageUploadFromRTMPEventGenerator(minio_fs_cli_config, media_source, buffer_stream_key, fps)
+    event_generator = ImageUploadFromRTMPEventGenerator(
+        minio_fs_cli_config, media_source, width, height, fps, buffer_stream_key)
     pub = Publisher(buffer_stream_key, stream_factory, um_stream_key, event_generator)
     pub.start()
 
@@ -32,13 +33,16 @@ def run_stream_to_buffer(buffer_stream_key, stream_factory, um_stream_key, media
 def main():
     # source = 'rtmp://localhost/live/mystream'
     # frame_skip_n = 5
-    source = sys.argv[1]
-    fps = int(sys.argv[2])
-    buffer_stream_key = sys.argv[3]
+    media_source = sys.argv[1]
+    width = int(sys.argv[2])
+    height = int(sys.argv[3])
+    fps = int(sys.argv[4])
+    buffer_stream_key = sys.argv[5]
 
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
     try:
-        run_stream_to_buffer(buffer_stream_key, stream_factory, USER_MANAGER_STREAM_KEY, source, fps)
+        run_stream_to_buffer(
+            stream_factory, USER_MANAGER_STREAM_KEY, media_source, width, height, fps, buffer_stream_key)
     except KeyboardInterrupt:
         pass
 
