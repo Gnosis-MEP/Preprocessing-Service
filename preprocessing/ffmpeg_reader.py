@@ -23,7 +23,6 @@ class FFMPEGReader():
         command = [
             self.ffmpeg,
             '-i', self.source,
-            # '-i', 'rtmp://localhost/live/mystream',             # fifo is the named pipe
             '-pix_fmt', 'bgr24',      # opencv requires bgr24 pixel format.
             '-vcodec', 'rawvideo',
             '-r', f'{self.fps}',

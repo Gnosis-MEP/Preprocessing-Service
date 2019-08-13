@@ -14,10 +14,11 @@ from preprocessing.conf import (
     MINIO_SECRET_KEY,
     MINIO_ENDPOINT,
     MINIO_SECURE_CONNECTION,
+    FFMPEG_BIN,
 )
 
 
-def run_stream_to_buffer(stream_factory, um_stream_key, media_source, width, height, fps, buffer_stream_key, ):
+def run_stream_to_buffer(stream_factory, um_stream_key, media_source, width, height, fps, buffer_stream_key, ffmpeg):
     minio_fs_cli_config = {
         'endpoint': MINIO_ENDPOINT,
         'access_key': MINIO_ACCESS_KEY,
@@ -25,7 +26,7 @@ def run_stream_to_buffer(stream_factory, um_stream_key, media_source, width, hei
         'secure': MINIO_SECURE_CONNECTION,
     }
     event_generator = ImageUploadFromRTMPEventGenerator(
-        minio_fs_cli_config, media_source, width, height, fps, buffer_stream_key)
+        minio_fs_cli_config, media_source, width, height, fps, buffer_stream_key, ffmpeg)
     pub = Publisher(buffer_stream_key, stream_factory, um_stream_key, event_generator)
     pub.start()
 
@@ -38,11 +39,10 @@ def main():
     height = int(sys.argv[3])
     fps = int(sys.argv[4])
     buffer_stream_key = sys.argv[5]
-
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
     try:
         run_stream_to_buffer(
-            stream_factory, USER_MANAGER_STREAM_KEY, media_source, width, height, fps, buffer_stream_key)
+            stream_factory, USER_MANAGER_STREAM_KEY, media_source, width, height, fps, buffer_stream_key, FFMPEG_BIN)
     except KeyboardInterrupt:
         pass
 

@@ -16,7 +16,7 @@ from preprocessing.ffmpeg_reader import FFMPEGReader
 
 
 class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
-    def __init__(self, file_storage_cli_config, media_source, width, height, fps, source):
+    def __init__(self, file_storage_cli_config, media_source, width, height, fps, source, ffmpeg_bin):
         self.file_storage_cli_config = file_storage_cli_config
         self.initialize_file_storage_client()
         self.media_source = media_source
@@ -27,10 +27,9 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
             source=media_source,
             width=self.width,
             height=self.height,
-            fps=self.fps
+            fps=self.fps,
+            ffmpeg=ffmpeg_bin
         )
-        # self.reader = cv2.VideoCapture(media_source)
-        # self.reader.set(cv2.CAP_PROP_FPS, float(self.fps))
 
         BaseEventGenerator.__init__(
             self, source=source, event_schema=EventVEkgMessage)
@@ -45,11 +44,7 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
         try:
             if self.reader.isOpened():
                 ret, frame = self.reader.read()
-                # self.reader.grab()
-                # ret, frame = self.reader.retrieve()
                 while not ret:
-                    # self.reader.grab()
-                    # time.sleep(0.05)
                     ret, frame = self.reader.read()
 
                 if ret:
@@ -59,9 +54,9 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
                     pil_img = Image.fromarray(frame[:, :, ::-1].copy())
 
                     event_id = f'{self.source}-{str(uuid.uuid4())}'
-                    obj_data = self.upload_inmemory_to_storage(pil_img)
-                    # obj_data = ''
-                    # print(obj_data)
+                    # obj_data = self.upload_inmemory_to_storage(pil_img)
+                    obj_data = ''
+                    print(obj_data)
 
                     img_url = obj_data
                     schema = self.event_schema(id=event_id, vekg={}, image_url=img_url, source=self.source)

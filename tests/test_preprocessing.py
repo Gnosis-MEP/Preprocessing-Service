@@ -62,8 +62,21 @@ class TestPreprocessing(MockedServiceStreamTestCase):
         self.assertEqual(1, len((mocked_run_sub_process.return_value.method_calls)))
         self.assertIn('kill', str(mocked_run_sub_process.return_value.method_calls[0]))
 
-    def test_process_cmd_(self):
-        pass
+    @patch('preprocessing.service.PreProcessing.start_preprocessing_for_buffer_stream')
+    def test_process_action_should_call_start_processing_with_right_args(self, start_proc_mock):
+        event_msg_tuple = prepare_event_msg_tuple({
+            'action': 'startPreprocessing',
+            'source': 'source',
+            'resolution': '640×480',
+            'fps': '15',
+            'buffer_stream_key': 'buffer_stream_key',
+        })
+        self.service.service_stream.mocked_values = [event_msg_tuple]
+        self.service.process_events()
+
+        import ipdb; ipdb.set_trace()
+        self.assertTrue(self.service._run_subprocess.called)
+
 
     def test_process_events_(self):
         pass
