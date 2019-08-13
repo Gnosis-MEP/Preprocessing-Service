@@ -25,8 +25,14 @@ def run_stream_to_buffer(stream_factory, um_stream_key, media_source, width, hei
         'secret_key': MINIO_SECRET_KEY,
         'secure': MINIO_SECURE_CONNECTION,
     }
+
+    redis_fs_cli_config = {
+        'host': REDIS_ADDRESS,
+        'port': REDIS_PORT,
+        'db': 0,
+    }
     event_generator = ImageUploadFromRTMPEventGenerator(
-        minio_fs_cli_config, media_source, width, height, fps, buffer_stream_key, ffmpeg)
+        redis_fs_cli_config, media_source, width, height, fps, buffer_stream_key, ffmpeg)
     pub = Publisher(buffer_stream_key, stream_factory, um_stream_key, event_generator)
     pub.start()
 

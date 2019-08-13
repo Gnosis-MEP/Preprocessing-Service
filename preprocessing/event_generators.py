@@ -9,13 +9,14 @@ from event_service_utils.schemas.events import EventVEkgMessage
 
 from event_service_utils.event_generators_processors.img_based import (
     BaseEventGenerator,
+    RedisImageCache,
     MinioMixing
 )
 
 from preprocessing.ffmpeg_reader import FFMPEGReader
 
 
-class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
+class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
     def __init__(self, file_storage_cli_config, media_source, width, height, fps, source, ffmpeg_bin):
         self.file_storage_cli_config = file_storage_cli_config
         self.initialize_file_storage_client()
@@ -33,12 +34,11 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
 
         BaseEventGenerator.__init__(
             self, source=source, event_schema=EventVEkgMessage)
-        self._create_bucket_for_publisher()
 
-    def initialize_file_storage_client(self):
-        self.fs_client = Minio(
-            **self.file_storage_cli_config
-        )
+    # def initialize_file_storage_client(self):
+    #     self.fs_client = Minio(
+    #         **self.file_storage_cli_config
+    #     )
 
     def next_event(self):
         try:
@@ -54,7 +54,7 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
                     pil_img = Image.fromarray(frame[:, :, ::-1].copy())
 
                     event_id = f'{self.source}-{str(uuid.uuid4())}'
-                    # obj_data = self.upload_inmemory_to_storage(pil_img)
+                    obj_data = self.upload_inmemory_to_storage(pil_img)
                     obj_data = ''
                     print(obj_data)
 
@@ -64,4 +64,3 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, MinioMixing):
         except Exception as e:
             self.reader.close()
             raise e
-        # finally:
