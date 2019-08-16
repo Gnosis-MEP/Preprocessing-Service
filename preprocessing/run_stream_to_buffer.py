@@ -9,7 +9,6 @@ from preprocessing.event_generators import (
 from preprocessing.conf import (
     REDIS_ADDRESS,
     REDIS_PORT,
-    USER_MANAGER_STREAM_KEY,
     MINIO_ACCESS_KEY,
     MINIO_SECRET_KEY,
     MINIO_ENDPOINT,
@@ -18,7 +17,7 @@ from preprocessing.conf import (
 )
 
 
-def run_stream_to_buffer(stream_factory, um_stream_key, media_source, width, height, fps, buffer_stream_key, ffmpeg):
+def run_stream_to_buffer(stream_factory, media_source, width, height, fps, buffer_stream_key, ffmpeg):
     minio_fs_cli_config = {
         'endpoint': MINIO_ENDPOINT,
         'access_key': MINIO_ACCESS_KEY,
@@ -31,6 +30,7 @@ def run_stream_to_buffer(stream_factory, um_stream_key, media_source, width, hei
         'port': REDIS_PORT,
         'db': 0,
     }
+    um_stream_key = 'um-data'  # remove this when refactoring to have own 'publisher class'
     event_generator = ImageUploadFromRTMPEventGenerator(
         redis_fs_cli_config, media_source, width, height, fps, buffer_stream_key, ffmpeg)
     pub = Publisher(buffer_stream_key, stream_factory, um_stream_key, event_generator)
@@ -48,7 +48,7 @@ def main():
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
     try:
         run_stream_to_buffer(
-            stream_factory, USER_MANAGER_STREAM_KEY, media_source, width, height, fps, buffer_stream_key, FFMPEG_BIN)
+            stream_factory, media_source, width, height, fps, buffer_stream_key, FFMPEG_BIN)
     except KeyboardInterrupt:
         pass
 

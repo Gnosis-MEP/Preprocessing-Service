@@ -7,7 +7,6 @@ from preprocessing.conf import (
     REDIS_ADDRESS,
     REDIS_PORT,
     RUN_STREAM_TO_BUFFERS,
-    USER_MANAGER_STREAM_KEY,
     PREPROCESSING_STREAM_KEY,
     PREPROCESSING_CMD_KEY,
     LOGGING_LEVEL
@@ -19,7 +18,6 @@ def run_service():
     service = PreProcessing(
         service_stream_key=PREPROCESSING_STREAM_KEY,
         service_cmd_key=PREPROCESSING_CMD_KEY,
-        um_stream_key=USER_MANAGER_STREAM_KEY,
         stream_to_buffers_bin=RUN_STREAM_TO_BUFFERS,
         stream_factory=stream_factory,
         logging_level=LOGGING_LEVEL

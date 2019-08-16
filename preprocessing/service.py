@@ -11,7 +11,6 @@ from event_service_utils.schemas.internal_msgs import (
 class PreProcessing(BaseService):
     def __init__(self,
                  service_stream_key, service_cmd_key,
-                 um_stream_key,
                  stream_to_buffers_bin,
                  stream_factory,
                  logging_level):
@@ -26,11 +25,6 @@ class PreProcessing(BaseService):
         )
 
         self.stream_to_buffers_bin = stream_to_buffers_bin
-        self.stream_factory = stream_factory
-        self.um_stream_key = um_stream_key
-        self.service_stream = self.stream_factory.create(service_stream_key)
-        self.service_cmd = self.stream_factory.create(service_cmd_key, stype='streamOnly')
-
         self.buffers = {}
 
     def _prepare_subprocess_arglist(self, source, resolution, fps, buffer_stream_key):
@@ -66,19 +60,6 @@ class PreProcessing(BaseService):
             subprocess = preprocessing_data['subprocess']
             subprocess.kill()
 
-    def process_events(self):
-        self.logger.debug('Processing EVENTS..')
-        if not self.service_stream:
-            return
-        event_list = self.service_stream.read_events(count=1)
-        for event_tuple in event_list:
-            event_id, json_msg = event_tuple
-            event_schema = self.cmd_event_schema(json_msg=json_msg)
-            event_data = event_schema.object_load_from_msg()
-            action = event_data['action']
-            self.process_action(action, event_data, json_msg)
-            self.log_state()
-
     def process_action(self, action, event_data, json_msg):
         super(PreProcessing, self).process_action(action, event_data, json_msg)
         if action == 'startPreprocessing':
@@ -97,10 +78,10 @@ class PreProcessing(BaseService):
 
     def run(self):
         super(PreProcessing, self).run()
-        # self.cmd_thread = threading.Thread(target=self.run_forever, args=(self.process_cmd,))
-        self.event_thread = threading.Thread(target=self.run_forever, args=(self.process_events,))
+        self.cmd_thread = threading.Thread(target=self.run_forever, args=(self.process_cmd,))
+        # self.event_thread = threading.Thread(target=self.run_forever, args=(self.process_cmd,))
         # self.run_virtual_publisher_thread()
-        # self.cmd_thread.start()
-        self.event_thread.start()
-        # self.cmd_thread.join()
-        self.event_thread.join()
+        self.cmd_thread.start()
+        # self.event_thread.start()
+        self.cmd_thread.join()
+        # self.event_thread.join()
