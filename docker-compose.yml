@@ -5,8 +5,8 @@ services:
     ports:
       - "6379:6379"
 
-  pre:
-    image: registry.insight-centre.org/sit/preprocessing-service:latest
+  service:
+    image: registry.insight-centre.org/sit/mps/preprocessing-service:latest
     command: echo "ok"
     build:
       context: '.'

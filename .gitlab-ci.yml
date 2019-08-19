@@ -1,0 +1,13 @@
+image: $CI_REGISTRY_IMAGE:latest
+
+before_script:
+  - cd $CI_PROJECT_DIR
+  - pip install -e .
+
+test:
+  stage: test
+  script:
+  - python --version
+  - pipenv --version
+  - cd $CI_PROJECT_DIR
+  - ./run_tests.sh

@@ -15,8 +15,4 @@ SERVICE_CMD_KEY = config('SERVICE_CMD_KEY', default='pp-cmd')
 
 LOGGING_LEVEL = config('LOGGING_LEVEL', default='ERROR')
 
-MINIO_ACCESS_KEY = config('MINIO_ACCESS_KEY', default='somekey')
-MINIO_SECRET_KEY = config('MINIO_SECRET_KEY', default='somesecret')
-MINIO_ENDPOINT = config('MINIO_ENDPOINT', default='localhost:9000')
-MINIO_SECURE_CONNECTION = config('MINIO_SECURE_CONNECTION', default=False, cast=bool)
 FFMPEG_BIN = config('FFMPEG_BIN', default='ffmpeg')
