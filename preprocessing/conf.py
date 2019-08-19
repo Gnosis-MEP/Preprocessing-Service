@@ -10,8 +10,8 @@ RUN_STREAM_TO_BUFFERS = os.path.join(SOURCE_DIR, 'run_stream_to_buffer.py')
 REDIS_ADDRESS = config('REDIS_ADDRESS', default='localhost')
 REDIS_PORT = config('REDIS_PORT', default='6379')
 
-PREPROCESSING_STREAM_KEY = config('PREPROCESSING_STREAM_KEY', default='pp-data')
-PREPROCESSING_CMD_KEY = config('PREPROCESSING_CMD_KEY', default='pp-cmd')
+SERVICE_STREAM_KEY = config('SERVICE_STREAM_KEY', default='pp-data')
+SERVICE_CMD_KEY = config('SERVICE_CMD_KEY', default='pp-cmd')
 
 LOGGING_LEVEL = config('LOGGING_LEVEL', default='ERROR')
 

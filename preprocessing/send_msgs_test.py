@@ -9,8 +9,8 @@ from event_service_utils.schemas.internal_msgs import (
 from preprocessing.conf import (
     REDIS_ADDRESS,
     REDIS_PORT,
-    PREPROCESSING_STREAM_KEY,
-    PREPROCESSING_CMD_KEY,
+    SERVICE_STREAM_KEY,
+    SERVICE_CMD_KEY,
 )
 
 
@@ -72,7 +72,7 @@ def send_msgs(service_stream):
 
 def main():
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
-    service_stream = stream_factory.create(PREPROCESSING_CMD_KEY, stype='streamOnly')
+    service_stream = stream_factory.create(SERVICE_CMD_KEY, stype='streamOnly')
     send_msgs(service_stream)
 
 

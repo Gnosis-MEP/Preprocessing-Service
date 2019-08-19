@@ -6,23 +6,23 @@ from event_service_utils.tests.json_msg_helper import prepare_event_msg_tuple
 from preprocessing.service import PreProcessing
 
 from preprocessing.conf import (
-    PREPROCESSING_STREAM_KEY,
-    PREPROCESSING_CMD_KEY,
+    SERVICE_STREAM_KEY,
+    SERVICE_CMD_KEY,
     RUN_STREAM_TO_BUFFERS,
 )
 
 
 class TestPreprocessing(MockedServiceStreamTestCase):
     GLOBAL_SERVICE_CONFIG = {
-        'service_stream_key': PREPROCESSING_STREAM_KEY,
-        'service_cmd_key': PREPROCESSING_CMD_KEY,
+        'service_stream_key': SERVICE_STREAM_KEY,
+        'service_cmd_key': SERVICE_CMD_KEY,
         'stream_to_buffers_bin': RUN_STREAM_TO_BUFFERS,
         'logging_level': 'ERROR'
     }
     SERVICE_CLS = PreProcessing
     MOCKED_STREAMS_DICT = {
-        PREPROCESSING_STREAM_KEY: [],
-        PREPROCESSING_CMD_KEY: [],
+        SERVICE_STREAM_KEY: [],
+        SERVICE_CMD_KEY: [],
     }
 
     @patch('preprocessing.service.PreProcessing._run_subprocess')
