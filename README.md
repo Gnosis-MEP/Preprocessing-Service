@@ -1,29 +1,9 @@
-# Namespace Mapper
-This service is responsible for mapping the queries into unique message buffers used by the pre-processor.
+# Preprocessing Service
+This service is responsible doing the preprocessing of the publishers streams.
+It takes one publisher stream as source, and generate the events with each frame into our system, based on a specific FPS and resolution.
 
 # Inputs
 
-## addQuery
-```json
-{
-    "action": "addQuery",
-    "query_id": "44d7985a-e41e-4d02-a772-a8f7c1c69124",
-    "publisher_id": "44d7985a-e41e-4d02-a772-a8f7c1c69124",
-    "source": "rtmp://localhost/live/mystream",
-    "resolution": "640x480",
-    "fps": "30"
-}
-```
-
-## delQuery
-```json
-{
-    "action": "delQuery",
-    "query_id": "44d7985a-e41e-4d02-a772-a8f7c1c69124"
-}
-```
-
-# Outputs
 ## startPreprocessing
 ```json
 {
@@ -43,6 +23,7 @@ This service is responsible for mapping the queries into unique message buffers 
     "buffer_stream_key": "buffer-stream-key"
 }
 ```
+# Outputs
 
 # Installation
 
@@ -61,35 +42,30 @@ This runs the installation using **pip** under the hood, but also handle the cro
 ### Using pip
 To install using pip directly, one needs to use the `--extra-index-url` when running the `pip install` command, in order for to be able to use our private Pypi repository.
 
-To install from the `requirements.txt` file, run the following command, but replacing the `{SIT_PYPI_USER}` and `{SIT_PYPI_PASS}` with the correct values:
-```
-$ pip install -r --extra-index-url https://{SIT_PYPI_USER}:{SIT_PYPI_PASS}@sit-pypi.herokuapp.com/simple
-```
+Load the environment variables from `.env` file using `source load_env.sh`.
 
-## Install project as a local package
-In order to be able to access the `namespace_mapper` python package from withing the python modules, one need to have it in the PYTHON_PATH.
-The easiest way to do that is to install the project in editable mode, to do that run the following command inside the project root directory:
+To install from the `requirements.txt` file, run the following command:
 ```
-$ pip install -e .
+$ pip install --extra-index-url https://${SIT_PYPI_USER}:${SIT_PYPI_PASS}@sit-pypi.herokuapp.com/simple -r requirements.txt
 ```
 
 # Running
 Inside the python environment (virtualenv or conda environment), run:
 ```
-$ ./namespace_mapper/.run.py
+$ ./preprocessing/.run.py
 ```
 
 # Testing
 Run the script `run_tests.sh`, it will run all tests defined in the **tests** directory.
 
-Also, there's a python script at `./namespace_mapper/send_msgs_test.py` to do some simple manual testing, by sending msgs to the service stream key.
+Also, there's a python script at `./preprocessing/send_msgs_test.py` to do some simple manual testing, by sending msgs to the service stream key.
 
 
 # Docker
 ## Build
 Build the docker image using: `docker-compose build`
 
-**ps**: It's required to have the .env variables loaded into the shell so that the container can build properly. An easy way of doing this is using `pipenv shell` to start the python environment with the `.env` file loaded.
+**ps**: It's required to have the .env variables loaded into the shell so that the container can build properly. An easy way of doing this is using `pipenv shell` to start the python environment with the `.env` file loaded or using the `source load_env.sh` command inside your preferable python environment (eg: conda).
 
 ## Run
 Use `docker-compose run --rm service` to run the docker image
