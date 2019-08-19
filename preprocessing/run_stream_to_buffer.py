@@ -9,22 +9,11 @@ from preprocessing.event_generators import (
 from preprocessing.conf import (
     REDIS_ADDRESS,
     REDIS_PORT,
-    MINIO_ACCESS_KEY,
-    MINIO_SECRET_KEY,
-    MINIO_ENDPOINT,
-    MINIO_SECURE_CONNECTION,
     FFMPEG_BIN,
 )
 
 
 def run_stream_to_buffer(stream_factory, media_source, width, height, fps, buffer_stream_key, ffmpeg):
-    minio_fs_cli_config = {
-        'endpoint': MINIO_ENDPOINT,
-        'access_key': MINIO_ACCESS_KEY,
-        'secret_key': MINIO_SECRET_KEY,
-        'secure': MINIO_SECURE_CONNECTION,
-    }
-
     redis_fs_cli_config = {
         'host': REDIS_ADDRESS,
         'port': REDIS_PORT,

@@ -28,6 +28,7 @@ def send_msgs(service_stream):
     msg_1 = new_action_msg(
         'startPreprocessing',
         {
+            'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
             'source': 'rtmp://localhost/live/mystream',
             'resolution': '640x480',
             'fps': '3',
@@ -37,6 +38,7 @@ def send_msgs(service_stream):
     msg_2 = new_action_msg(
         'startPreprocessing',
         {
+            'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
             'source': 'rtmp://localhost/live/mystream',
             'resolution': '320x240',
             'fps': '15',
@@ -46,6 +48,7 @@ def send_msgs(service_stream):
     msg_3 = new_action_msg(
         'startPreprocessing',
         {
+            'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
             'source': 'rtmp://localhost/live/mystream',
             'resolution': '640x480',
             'fps': '30',

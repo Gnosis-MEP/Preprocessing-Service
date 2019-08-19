@@ -29,6 +29,7 @@ class TestPreprocessing(MockedServiceStreamTestCase):
     def test_process_action_start_preprocessing_for_buffer_stream_call_sub_process(self, mocked_run_sub_process):
         event_msg_tuple = prepare_event_msg_tuple({
             'action': 'startPreprocessing',
+            'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
             'source': 'source',
             'resolution': '640x480',
             'fps': '15',
@@ -41,6 +42,7 @@ class TestPreprocessing(MockedServiceStreamTestCase):
             [
                 'python',
                 self.GLOBAL_SERVICE_CONFIG['stream_to_buffers_bin'],
+                '44d7985a-e41e-4d02-a772-a8f7c1c69124',
                 'source',
                 '640',
                 '480',
@@ -52,6 +54,7 @@ class TestPreprocessing(MockedServiceStreamTestCase):
     def test_process_action_stop_preprocessing_for_buffer_stream_kill_sub_process(self, mocked_run_sub_process):
         event_msg_tuple = prepare_event_msg_tuple({
             'action': 'startPreprocessing',
+            'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
             'source': 'source',
             'resolution': '640x480',
             'fps': '15',
@@ -73,6 +76,7 @@ class TestPreprocessing(MockedServiceStreamTestCase):
     def test_process_action_should_call_start_processing_with_right_args(self, start_proc_mock):
         event_msg_tuple = prepare_event_msg_tuple({
             'action': 'startPreprocessing',
+            'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
             'source': 'source',
             'resolution': '640x480',
             'fps': '15',
@@ -80,5 +84,5 @@ class TestPreprocessing(MockedServiceStreamTestCase):
         })
         self.service.service_cmd.mocked_values = [event_msg_tuple]
         self.service.process_cmd()
-
-        start_proc_mock.assert_called_once_with('source', '640x480', '15', 'buffer_stream_key')
+        start_proc_mock.assert_called_once_with(
+            '44d7985a-e41e-4d02-a772-a8f7c1c69124', 'source', '640x480', '15', 'buffer_stream_key')

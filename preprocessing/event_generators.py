@@ -3,14 +3,12 @@ import uuid
 
 import cv2
 from PIL import Image
-from minio import Minio
 
 from event_service_utils.schemas.events import EventVEkgMessage
 
 from event_service_utils.event_generators_processors.img_based import (
     BaseEventGenerator,
     RedisImageCache,
-    MinioMixing
 )
 
 from preprocessing.ffmpeg_reader import FFMPEGReader
@@ -34,11 +32,6 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
 
         BaseEventGenerator.__init__(
             self, source=source, event_schema=EventVEkgMessage)
-
-    # def initialize_file_storage_client(self):
-    #     self.fs_client = Minio(
-    #         **self.file_storage_cli_config
-    #     )
 
     def next_event(self):
         try:
