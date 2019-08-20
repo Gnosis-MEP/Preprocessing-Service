@@ -15,7 +15,7 @@ from preprocessing.ffmpeg_reader import FFMPEGReader
 
 
 class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
-    def __init__(self, file_storage_cli_config, media_source, width, height, fps, source, ffmpeg_bin):
+    def __init__(self, file_storage_cli_config, publisher_id, media_source, width, height, fps, source, ffmpeg_bin):
         self.file_storage_cli_config = file_storage_cli_config
         self.initialize_file_storage_client()
         self.media_source = media_source

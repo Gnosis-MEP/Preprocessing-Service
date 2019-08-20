@@ -27,28 +27,29 @@ class PreProcessing(BaseService):
         self.stream_to_buffers_bin = stream_to_buffers_bin
         self.buffers = {}
 
-    def _prepare_subprocess_arglist(self, source, resolution, fps, buffer_stream_key):
+    def _prepare_subprocess_arglist(self, publisher_id, source, resolution, fps, buffer_stream_key):
         width, height = resolution.split('x')
-        return ['python', self.stream_to_buffers_bin, source, width, height, str(fps), buffer_stream_key]
+        return ['python', self.stream_to_buffers_bin, publisher_id, source, width, height, str(fps), buffer_stream_key]
 
     def _run_subprocess(self, *args):
         self.logger.debug(f'Starting subprocess with args: {args}')
         p = subprocess.Popen(*args)
         return p
 
-    def start_preprocessing_for_buffer_stream(self, source, resolution, fps, buffer_stream_key):
+    def start_preprocessing_for_buffer_stream(self, publisher_id, source, resolution, fps, buffer_stream_key):
         # source = 'rtmp://localhost/live/mystream'
         # frame_skip_n = 5
         # url, frame_skip_n = action.split('-')
 
         preprocessing_data = {
+            'publisher_id': publisher_id,
             'source': source,
             'resolution': resolution,
             'fps': fps,
             'buffer_stream_key': buffer_stream_key,
         }
         self.logger.info(f'Starting preprocessing for: {buffer_stream_key}. Buffer data: {preprocessing_data}')
-        arg_list = self._prepare_subprocess_arglist(source, resolution, fps, buffer_stream_key)
+        arg_list = self._prepare_subprocess_arglist(publisher_id, source, resolution, fps, buffer_stream_key)
         p = self._run_subprocess(arg_list)
         preprocessing_data['subprocess'] = p
         self.buffers.update({buffer_stream_key: preprocessing_data})
@@ -63,11 +64,12 @@ class PreProcessing(BaseService):
     def process_action(self, action, event_data, json_msg):
         super(PreProcessing, self).process_action(action, event_data, json_msg)
         if action == 'startPreprocessing':
+            publisher_id = event_data['publisher_id']
             source = event_data['source']
             resolution = event_data['resolution']
             fps = event_data['fps']
             buffer_stream_key = event_data['buffer_stream_key']
-            self.start_preprocessing_for_buffer_stream(source, resolution, fps, buffer_stream_key)
+            self.start_preprocessing_for_buffer_stream(publisher_id, source, resolution, fps, buffer_stream_key)
         elif action == 'stopPreprocessing':
             buffer_stream_key = event_data['buffer_stream_key']
             self.stop_preprocessing_for_buffer_stream(buffer_stream_key)

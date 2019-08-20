@@ -13,31 +13,52 @@ from preprocessing.conf import (
 )
 
 
-def run_stream_to_buffer(stream_factory, media_source, width, height, fps, buffer_stream_key, ffmpeg):
+class PublishToBuffer():
+
+    def __init__(self, buffer_stream_key, stream_factory, event_generator):
+        self.buffer_stream_key = buffer_stream_key
+        self.stream_factory = stream_factory
+        self.stream = self.stream_factory.create(self.buffer_stream_key)
+        self.event_generator = event_generator
+
+    def publish_next_event(self):
+        event_data = self.event_generator.next_event()
+        self.stream.write_events(event_data)
+
+    def start(self):
+        super(Publisher, self).start()
+        try:
+            while True:
+                self.publish_next_event()
+        finally:
+            self.stop()
+
+
+def run_stream_to_buffer(stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, ffmpeg):
     redis_fs_cli_config = {
         'host': REDIS_ADDRESS,
         'port': REDIS_PORT,
         'db': 0,
     }
-    um_stream_key = 'um-data'  # remove this when refactoring to have own 'publisher class'
     event_generator = ImageUploadFromRTMPEventGenerator(
-        redis_fs_cli_config, media_source, width, height, fps, buffer_stream_key, ffmpeg)
-    pub = Publisher(buffer_stream_key, stream_factory, um_stream_key, event_generator)
-    pub.start()
+        redis_fs_cli_config, publisher_id, media_source, width, height, fps, buffer_stream_key, ffmpeg)
+    pub_buffer = PublishToBuffer(buffer_stream_key, stream_factory, event_generator)
+    pub_buffer.start()
 
 
 def main():
     # source = 'rtmp://localhost/live/mystream'
     # frame_skip_n = 5
-    media_source = sys.argv[1]
-    width = int(sys.argv[2])
-    height = int(sys.argv[3])
-    fps = int(sys.argv[4])
-    buffer_stream_key = sys.argv[5]
+    publisher_id = sys.argv[1]
+    media_source = sys.argv[2]
+    width = int(sys.argv[3])
+    height = int(sys.argv[4])
+    fps = int(sys.argv[5])
+    buffer_stream_key = sys.argv[6]
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
     try:
         run_stream_to_buffer(
-            stream_factory, media_source, width, height, fps, buffer_stream_key, FFMPEG_BIN)
+            stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, FFMPEG_BIN)
     except KeyboardInterrupt:
         pass
 
