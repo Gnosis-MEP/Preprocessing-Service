@@ -80,10 +80,4 @@ class PreProcessing(BaseService):
 
     def run(self):
         super(PreProcessing, self).run()
-        self.cmd_thread = threading.Thread(target=self.run_forever, args=(self.process_cmd,))
-        # self.event_thread = threading.Thread(target=self.run_forever, args=(self.process_cmd,))
-        # self.run_virtual_publisher_thread()
-        self.cmd_thread.start()
-        # self.event_thread.start()
-        self.cmd_thread.join()
-        # self.event_thread.join()
+        self.run_forever(self.process_cmd)

@@ -8,10 +8,10 @@ import numpy
 class FFMPEGReader():
     """docstring for FFMPEGReader"""
 
-    def __init__(self, source, width, height, fps, ffmpeg='ffmpeg'):
+    def __init__(self, media_source, width, height, fps, ffmpeg='ffmpeg'):
         super(FFMPEGReader, self).__init__()
         self.ffmpeg = ffmpeg
-        self.source = source
+        self.media_source = media_source
         self.width = width
         self.height = height
         self.fps = fps
@@ -22,7 +22,7 @@ class FFMPEGReader():
     def prepare_cmd(self):
         command = [
             self.ffmpeg,
-            '-i', self.source,
+            '-i', self.media_source,
             '-pix_fmt', 'bgr24',      # opencv requires bgr24 pixel format.
             '-vcodec', 'rawvideo',
             '-r', f'{self.fps}',

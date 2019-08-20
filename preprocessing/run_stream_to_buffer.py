@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-from event_service_utils.pub_sub import Publisher
 from event_service_utils.streams.redis import RedisStreamFactory
 from preprocessing.event_generators import (
     ImageUploadFromRTMPEventGenerator
@@ -26,12 +25,14 @@ class PublishToBuffer():
         self.stream.write_events(event_data)
 
     def start(self):
-        super(Publisher, self).start()
         try:
             while True:
                 self.publish_next_event()
         finally:
             self.stop()
+
+    def stop(self):
+        pass
 
 
 def run_stream_to_buffer(stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, ffmpeg):
@@ -41,7 +42,7 @@ def run_stream_to_buffer(stream_factory, publisher_id, media_source, width, heig
         'db': 0,
     }
     event_generator = ImageUploadFromRTMPEventGenerator(
-        redis_fs_cli_config, publisher_id, media_source, width, height, fps, buffer_stream_key, ffmpeg)
+        redis_fs_cli_config, publisher_id, media_source, width, height, fps, ffmpeg)
     pub_buffer = PublishToBuffer(buffer_stream_key, stream_factory, event_generator)
     pub_buffer.start()
 
