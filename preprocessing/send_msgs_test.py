@@ -29,7 +29,7 @@ def send_msgs(service_stream):
         'startPreprocessing',
         {
             'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
-            'source': 'rtmp://localhost/live/mystream',
+            'source': 'rtmp://172.17.0.1/live/mystream',
             'resolution': '640x480',
             'fps': '3',
             'buffer_stream_key': 'buffer-stream-key1',

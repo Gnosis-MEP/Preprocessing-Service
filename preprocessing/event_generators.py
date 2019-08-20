@@ -1,7 +1,7 @@
-import time
+# import time
 import uuid
 
-import cv2
+# import cv2
 from PIL import Image
 
 from event_service_utils.schemas.events import EventVEkgMessage
@@ -39,8 +39,8 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
                     ret, frame = self.reader.read()
 
                 if ret:
-                    cv2.imshow(f'{self.media_source}-{self.fps}-{self.width}x{self.height}', frame)
-                    cv2.waitKey(1)
+                    # cv2.imshow(f'{self.media_source}-{self.fps}-{self.width}x{self.height}', frame)
+                    # cv2.waitKey(1)
                     print("new frame")
                     pil_img = Image.fromarray(frame[:, :, ::-1].copy())
 
