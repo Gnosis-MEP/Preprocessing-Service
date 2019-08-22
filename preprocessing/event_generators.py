@@ -46,8 +46,6 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
 
                     event_id = f'{self.source}-{str(uuid.uuid4())}'
                     obj_data = self.upload_inmemory_to_storage(pil_img)
-                    obj_data = ''
-
                     img_url = obj_data
                     schema = self.event_schema(id=event_id, vekg={}, image_url=img_url, source=self.source)
                     msg_json = schema.json_msg_load_from_dict()
