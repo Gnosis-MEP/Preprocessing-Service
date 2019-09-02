@@ -1,7 +1,7 @@
-# import time
+import time
 import uuid
 
-# import cv2
+import cv2
 from PIL import Image
 
 from event_service_utils.schemas.events import EventVEkgMessage
@@ -9,7 +9,7 @@ from event_service_utils.schemas.events import EventVEkgMessage
 from event_service_utils.event_generators_processors.base import BaseEventGenerator
 from event_service_utils.img_serialization.redis import RedisImageCache
 
-from preprocessing.ffmpeg_reader import FFMPEGReader
+from preprocessing.ffmpeg_reader import FFMPEGReader, OCVBasedFFMPEGReader
 
 
 class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
@@ -20,7 +20,7 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
         self.width = width
         self.height = height
         self.fps = fps
-        self.reader = FFMPEGReader(
+        self.reader = OCVBasedFFMPEGReader(
             media_source=media_source,
             width=self.width,
             height=self.height,
@@ -36,11 +36,13 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
             if self.reader.isOpened():
                 ret, frame = self.reader.read()
                 while not ret:
+                    time.sleep(0.01)
                     ret, frame = self.reader.read()
+                    print('bad ret')
 
                 if ret:
-                    # cv2.imshow(f'{self.media_source}-{self.fps}-{self.width}x{self.height}', frame)
-                    # cv2.waitKey(1)
+                    cv2.imshow(f'{self.media_source}-{self.fps}-{self.width}x{self.height}', frame)
+                    cv2.waitKey(1)
                     print("new frame")
                     pil_img = Image.fromarray(frame[:, :, ::-1].copy())
 
