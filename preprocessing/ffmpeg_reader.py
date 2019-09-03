@@ -68,7 +68,7 @@ class OCVBasedFFMPEGReader():
         self.cmd = self.prepare_cmd()
         # self.subprocess = self.open_subprocess_pipe(self.cmd)
         time.sleep(2)
-        self.capture = cv2.VideoCapture(0)
+        self.capture = cv2.VideoCapture('fifo')
 
     def prepare_cmd(self):
         command = [
