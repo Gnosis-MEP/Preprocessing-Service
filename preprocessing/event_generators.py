@@ -10,13 +10,12 @@ from PIL import Image
 
 import logzero
 
-from event_service_utils.schemas.events import EventVEkgMessage
-
 from event_service_utils.event_generators_processors.base import BaseEventGenerator
 from event_service_utils.img_serialization.redis import RedisImageCache
 from event_service_utils.img_serialization.base import image_to_bytes
 
 from preprocessing.ffmpeg_reader import FFMPEGReader, OCVBasedFFMPEGReader
+from preprocessing.schemas import EventVEkgMessage
 from preprocessing.conf import LOGGING_LEVEL
 
 
@@ -44,7 +43,7 @@ def setup_logger(name):
 
 
 class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
-    def __init__(self, file_storage_cli_config, source, media_source, width, height, fps, ffmpeg_bin):
+    def __init__(self, file_storage_cli_config, publisher_id, media_source, width, height, fps, ffmpeg_bin):
         self.file_storage_cli_config = file_storage_cli_config
         self.initialize_file_storage_client()
         self.media_source = media_source
@@ -62,7 +61,7 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
         self.logger = setup_logger(self.__class__.__name__)
 
         BaseEventGenerator.__init__(
-            self, source=source, event_schema=EventVEkgMessage)
+            self, source=publisher_id, event_schema=EventVEkgMessage)
 
     @timer_logger
     def upload_inmemory_to_storage(self, img_numpy_array):
@@ -85,7 +84,7 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
                     obj_data = self.upload_inmemory_to_storage(frame)
 
                     img_url = obj_data
-                    schema = self.event_schema(id=event_id, vekg={}, image_url=img_url, source=self.source)
+                    schema = self.event_schema(id=event_id, vekg={}, image_url=img_url, publisher_id=, source=self.media_source)
                     schema.dict.update({
                         'width': self.width,
                         'height': self.height,
