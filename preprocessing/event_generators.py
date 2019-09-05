@@ -46,6 +46,7 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
     def __init__(self, file_storage_cli_config, publisher_id, media_source, width, height, fps, ffmpeg_bin):
         self.file_storage_cli_config = file_storage_cli_config
         self.initialize_file_storage_client()
+        self.publisher_id = publisher_id
         self.media_source = media_source
         self.width = width
         self.height = height
@@ -84,7 +85,10 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
                     obj_data = self.upload_inmemory_to_storage(frame)
 
                     img_url = obj_data
-                    schema = self.event_schema(id=event_id, vekg={}, image_url=img_url, publisher_id=, source=self.media_source)
+                    schema = self.event_schema(
+                        id=event_id, vekg={}, image_url=img_url,
+                        publisher_id=self.publisher_id, source=self.media_source
+                    )
                     schema.dict.update({
                         'width': self.width,
                         'height': self.height,
