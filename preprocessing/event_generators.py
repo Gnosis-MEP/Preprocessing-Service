@@ -74,9 +74,9 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
             if self.reader.isOpened():
                 ret, frame = self.reader.read()
                 while not ret:
+                    self.logger.error(f'Bad return reading frame from {self.reader}, will sleep a bit and try again')
                     time.sleep(0.1)
                     ret, frame = self.reader.read()
-                    print('bad ret')
 
                 if ret:
                     # cv2.imshow(f'{self.media_source}-{self.fps}-{self.width}x{self.height}', frame)
