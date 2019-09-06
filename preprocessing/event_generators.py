@@ -69,15 +69,6 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
     @timer_logger
     def upload_inmemory_to_storage(self, img_numpy_array):
         return super(ImageUploadFromRTMPEventGenerator, self).upload_inmemory_to_storage(img_numpy_array)
-        # img_key = str(uuid.uuid4())
-        # nd_array_bytes = img_numpy_array.tobytes(order='C')
-
-        # ret = self.client.set(img_key, nd_array_bytes)
-        # if ret:
-        #     self.client.expire(img_key, self.expiration_time)
-        # else:
-        #     raise Exception('Couldnt set image in redis')
-        # return img_key
 
     @timer_logger
     def next_event(self):
