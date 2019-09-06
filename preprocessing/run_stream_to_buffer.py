@@ -9,6 +9,7 @@ from preprocessing.conf import (
     REDIS_ADDRESS,
     REDIS_PORT,
     FFMPEG_BIN,
+    REDIS_EXPIRATION_TIME,
 )
 
 
@@ -35,14 +36,15 @@ class PublishToBuffer():
         pass
 
 
-def run_stream_to_buffer(stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, ffmpeg):
+def run_stream_to_buffer(
+        stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, ffmpeg, expiration_time):
     redis_fs_cli_config = {
         'host': REDIS_ADDRESS,
         'port': REDIS_PORT,
         'db': 0,
     }
     event_generator = ImageUploadFromRTMPEventGenerator(
-        redis_fs_cli_config, publisher_id, media_source, width, height, fps, ffmpeg)
+        redis_fs_cli_config, publisher_id, media_source, width, height, fps, ffmpeg, expiration_time)
     pub_buffer = PublishToBuffer(buffer_stream_key, stream_factory, event_generator)
     pub_buffer.start()
 
@@ -59,7 +61,7 @@ def main():
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
     try:
         run_stream_to_buffer(
-            stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, FFMPEG_BIN)
+            stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, FFMPEG_BIN, REDIS_EXPIRATION_TIME)
     except KeyboardInterrupt:
         pass
 

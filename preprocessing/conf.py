@@ -16,3 +16,5 @@ SERVICE_CMD_KEY = config('SERVICE_CMD_KEY', default='pp-cmd')
 LOGGING_LEVEL = config('LOGGING_LEVEL', default='ERROR')
 
 FFMPEG_BIN = config('FFMPEG_BIN', default='ffmpeg')
+
+REDIS_EXPIRATION_TIME = config('REDIS_EXPIRATION_TIME', default=30)

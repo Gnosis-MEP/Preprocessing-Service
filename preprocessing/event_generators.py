@@ -43,7 +43,8 @@ def setup_logger(name):
 
 
 class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
-    def __init__(self, file_storage_cli_config, publisher_id, media_source, width, height, fps, ffmpeg_bin):
+    def __init__(
+            self, file_storage_cli_config, publisher_id, media_source, width, height, fps, ffmpeg_bin, expiration_time):
         self.file_storage_cli_config = file_storage_cli_config
         self.initialize_file_storage_client()
         self.publisher_id = publisher_id
@@ -51,6 +52,7 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
         self.width = width
         self.height = height
         self.fps = fps
+        self.expiration_time = expiration_time
         self.reader = FFMPEGReader(
             media_source=media_source,
             width=self.width,
@@ -66,7 +68,15 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
 
     @timer_logger
     def upload_inmemory_to_storage(self, img_numpy_array):
-        return super(ImageUploadFromRTMPEventGenerator, self).upload_inmemory_to_storage(img_numpy_array)
+        img_key = str(uuid.uuid4())
+        nd_array_bytes = img_numpy_array.tobytes(order='C')
+
+        ret = self.client.set(img_key, nd_array_bytes)
+        if ret:
+            self.client.expire(img_key, self.expiration_time)
+        else:
+            raise Exception('Couldnt set image in redis')
+        return img_key
 
     @timer_logger
     def next_event(self):
