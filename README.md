@@ -2,9 +2,10 @@
 This service is responsible doing the preprocessing of the publishers streams.
 It takes one publisher stream as source, and generate the events with each frame into our system, based on a specific FPS and resolution.
 
-# Inputs
+# Commands Stream
+## Inputs
 
-## startPreprocessing
+### startPreprocessing
 ```json
 {
     "action": "startPreprocessing",
@@ -16,14 +17,30 @@ It takes one publisher stream as source, and generate the events with each frame
 }
 ```
 
-## stopPreprocessing
+### stopPreprocessing
 ```json
 {
     "action": "stopPreprocessing",
     "buffer_stream_key": "buffer-stream-key"
 }
 ```
-# Outputs
+## Outputs
+None
+
+# Data Stream
+Generate event data with the following fields, as the following example:
+```json
+{
+    "id": "publisher-id-2-6c80a860-6a08-4d22-a9b9-9acf7016b863",
+    "publisher_id": "publisher-id-2",
+    "source": "rtmp://172.17.0.1/live/mystream",
+    "image_url": "c8d025d3-8c3a-460c-a6f5-cabb7b179807",
+    "vekg": {},
+    "width": 640,
+    "height": 480,
+    "color_channels": "BGR"
+}
+```
 
 # Installation
 
