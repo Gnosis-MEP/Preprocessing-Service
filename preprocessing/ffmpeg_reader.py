@@ -24,6 +24,8 @@ class FFMPEGReader():
     def prepare_cmd(self):
         command = [
             self.ffmpeg,
+            # '-analyzeduration', '17777', '-probesize', '32',
+            # '-fflags', 'nobuffer',
             '-i', self.media_source,
             '-pix_fmt', 'bgr24',      # opencv requires bgr24 pixel format.
             '-vcodec', 'rawvideo',
