@@ -1,27 +1,26 @@
 import subprocess
 import threading
 
-from event_service_utils.services.base import BaseService
-# from event_service_utils.schemas.events import BaseEventMessage
-from event_service_utils.schemas.internal_msgs import (
-    BaseInternalMessage,
-)
+from event_service_utils.services.tracer import BaseTracerService
+from event_service_utils.tracing.jaeger import init_tracer
 
 
-class PreProcessing(BaseService):
+class PreProcessing(BaseTracerService):
     def __init__(self,
                  service_stream_key, service_cmd_key,
                  stream_to_buffers_bin,
                  stream_factory,
-                 logging_level):
+                 logging_level,
+                 tracer_configs):
 
+        tracer = init_tracer(self.__class__.__name__, **tracer_configs)
         super(PreProcessing, self).__init__(
             name=self.__class__.__name__,
             service_stream_key=service_stream_key,
             service_cmd_key=service_cmd_key,
-            cmd_event_schema=BaseInternalMessage,
             stream_factory=stream_factory,
-            logging_level=logging_level
+            logging_level=logging_level,
+            tracer=tracer,
         )
 
         self.stream_to_buffers_bin = stream_to_buffers_bin

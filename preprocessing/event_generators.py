@@ -97,8 +97,18 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
                         'color_channels': self.color_channels
                     })
 
-                    msg_json = schema.json_msg_load_from_dict()
-                    return msg_json
+                    # tracer_tags = {
+                    #     # tags.MESSAGE_BUS_DESTINATION: destination_stream.key,
+                    #     tags.SPAN_KIND: tags.SPAN_KIND_CONSUMER,
+                    #     # tags.SPAN_KIND: tags.SPAN_KIND_PRODUCER,
+                    #     EVENT_ID_TAG: schema.dict['id'],
+                    # }
+                    # with self.tracer.start_span('next_event') as span:
+                    #     for tag, value in tracer_tags.items():
+                    #         span.set_tag(tag, value)
+                        # schema.dict = self.inject_current_tracer_into_event_data(schema.dict)
+                        # msg_json = schema.json_msg_load_from_dict()
+                    return schema
         except Exception as e:
             self.reader.close()
             raise e

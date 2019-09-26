@@ -10,6 +10,9 @@ RUN_STREAM_TO_BUFFERS = os.path.join(SOURCE_DIR, 'run_stream_to_buffer.py')
 REDIS_ADDRESS = config('REDIS_ADDRESS', default='localhost')
 REDIS_PORT = config('REDIS_PORT', default='6379')
 
+TRACER_REPORTING_HOST = config('TRACER_REPORTING_HOST', default='localhost')
+TRACER_REPORTING_PORT = config('TRACER_REPORTING_PORT', default='6831')
+
 SERVICE_STREAM_KEY = config('SERVICE_STREAM_KEY', default='pp-data')
 SERVICE_CMD_KEY = config('SERVICE_CMD_KEY', default='pp-cmd')
 
