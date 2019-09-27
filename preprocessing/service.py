@@ -1,5 +1,4 @@
 import subprocess
-import threading
 
 from event_service_utils.services.tracer import BaseTracerService
 from event_service_utils.tracing.jaeger import init_tracer
@@ -61,7 +60,8 @@ class PreProcessing(BaseTracerService):
             subprocess.kill()
 
     def process_action(self, action, event_data, json_msg):
-        super(PreProcessing, self).process_action(action, event_data, json_msg)
+        if not super(PreProcessing, self).process_action(action, event_data, json_msg):
+            return False
         if action == 'startPreprocessing':
             publisher_id = event_data['publisher_id']
             source = event_data['source']

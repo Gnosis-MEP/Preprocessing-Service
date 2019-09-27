@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-import time
+import json
+import uuid
 
 from event_service_utils.streams.redis import RedisStreamFactory
-from event_service_utils.schemas.internal_msgs import (
-    BaseInternalMessage,
-)
 
 from preprocessing.conf import (
     REDIS_ADDRESS,
@@ -19,9 +17,9 @@ def make_dict_key_bites(d):
 
 
 def new_action_msg(action, event_data):
-    schema = BaseInternalMessage(action=action)
-    schema.dict.update(event_data)
-    return schema.json_msg_load_from_dict()
+    event_data['action'] = action
+    event_data.update({'id': str(uuid.uuid4())})
+    return {'event': json.dumps(event_data)}
 
 
 def send_msgs(service_stream):

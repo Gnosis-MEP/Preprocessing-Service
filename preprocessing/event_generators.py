@@ -13,24 +13,11 @@ import logzero
 from event_service_utils.event_generators_processors.base import BaseEventGenerator
 from event_service_utils.img_serialization.redis import RedisImageCache
 from event_service_utils.img_serialization.base import image_to_bytes
+from event_service_utils.logging.decorators import timer_logger
 
 from preprocessing.ffmpeg_reader import FFMPEGReader, OCVBasedFFMPEGReader
 from preprocessing.schemas import EventVEkgMessage
 from preprocessing.conf import LOGGING_LEVEL
-
-
-def timer_logger(func):
-    """Print the runtime of the decorated function"""
-    @functools.wraps(func)
-    def wrapper_timer(*args, **kwargs):
-        start_time = time.perf_counter()    # 1
-        value = func(*args, **kwargs)
-        end_time = time.perf_counter()      # 2
-        run_time = end_time - start_time    # 3
-        logger = args[0].logger
-        logger.debug(f"Finished {func.__qualname__!r} in {run_time:.4f} secs")
-        return value
-    return wrapper_timer
 
 
 def setup_logger(name):
@@ -97,17 +84,6 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
                         'color_channels': self.color_channels
                     })
 
-                    # tracer_tags = {
-                    #     # tags.MESSAGE_BUS_DESTINATION: destination_stream.key,
-                    #     tags.SPAN_KIND: tags.SPAN_KIND_CONSUMER,
-                    #     # tags.SPAN_KIND: tags.SPAN_KIND_PRODUCER,
-                    #     EVENT_ID_TAG: schema.dict['id'],
-                    # }
-                    # with self.tracer.start_span('next_event') as span:
-                    #     for tag, value in tracer_tags.items():
-                    #         span.set_tag(tag, value)
-                        # schema.dict = self.inject_current_tracer_into_event_data(schema.dict)
-                        # msg_json = schema.json_msg_load_from_dict()
                     return schema
         except Exception as e:
             self.reader.close()
