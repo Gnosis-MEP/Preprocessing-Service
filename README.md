@@ -8,6 +8,7 @@ It takes one publisher stream as source, and generate the events with each frame
 ### startPreprocessing
 ```json
 {
+    "id": "abc-123abc-123abc-123abc-123abc-123abc-123",
     "action": "startPreprocessing",
     "publisher_id": "44d7985a-e41e-4d02-a772-a8f7c1c69124",
     "source": "rtmp://localhost/live/mystream",
@@ -20,6 +21,7 @@ It takes one publisher stream as source, and generate the events with each frame
 ### stopPreprocessing
 ```json
 {
+    "id": "abc-123abc-123abc-123abc-123abc-123abc-123",
     "action": "stopPreprocessing",
     "buffer_stream_key": "buffer-stream-key"
 }
