@@ -53,7 +53,6 @@ class PublishToBuffer():
                 scope.span.set_tag(tag, value)
             event_schema.dict = self.inject_current_tracer_into_event_data(event_schema.dict)
             msg_json = event_schema.json_msg_load_from_dict()
-            print(event_schema.dict)
             self.stream.write_events(msg_json)
 
     def start(self):
