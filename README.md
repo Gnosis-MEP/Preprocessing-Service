@@ -14,7 +14,8 @@ It takes one publisher stream as source, and generate the events with each frame
     "source": "rtmp://localhost/live/mystream",
     "resolution": "640x480",
     "fps": "30",
-    "buffer_stream_key": "buffer-stream-key"
+    "buffer_stream_key": "buffer-stream-key",
+    "query_ids": ["query-id1", "query-id2"]
 }
 ```
 
@@ -40,7 +41,8 @@ Generate event data with the following fields, as the following example:
     "vekg": {},
     "width": 640,
     "height": 480,
-    "color_channels": "BGR"
+    "color_channels": "BGR",
+    "query_ids": ["query-id1", "query-id2"]
 }
 ```
 
