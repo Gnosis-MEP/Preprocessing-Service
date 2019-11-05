@@ -52,7 +52,7 @@ class TestPreprocessing(MockedServiceStreamTestCase):
             'resolution': '640x480',
             'fps': '15',
             'buffer_stream_key': 'buffer_stream_key',
-            'query_id': 'query-id',
+            'query_ids': ['query-id'],
         })
         self.service.service_cmd.mocked_values = [event_msg_tuple]
         self.service.process_cmd()
@@ -81,6 +81,7 @@ class TestPreprocessing(MockedServiceStreamTestCase):
             'resolution': '640x480',
             'fps': '15',
             'buffer_stream_key': 'buffer_stream_key',
+            'query_ids': ['query-id'],
         })
         self.service.service_cmd.mocked_values = [event_msg_tuple]
         self.service.process_cmd()
@@ -105,9 +106,9 @@ class TestPreprocessing(MockedServiceStreamTestCase):
             'resolution': '640x480',
             'fps': '15',
             'buffer_stream_key': 'buffer_stream_key',
-            'query_id': 'query-id',
+            'query_ids': ['query-id'],
         })
         self.service.service_cmd.mocked_values = [event_msg_tuple]
         self.service.process_cmd()
         start_proc_mock.assert_called_once_with(
-            '44d7985a-e41e-4d02-a772-a8f7c1c69124', 'source', '640x480', '15', 'buffer_stream_key', 'query_id')
+            '44d7985a-e41e-4d02-a772-a8f7c1c69124', 'source', '640x480', '15', 'buffer_stream_key', ['query-id'])

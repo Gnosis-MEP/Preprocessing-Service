@@ -27,30 +27,33 @@ def send_msgs(service_stream):
         'startPreprocessing',
         {
             'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
-            'source': 'rtmp://172.17.0.1/live/mystream',
+            'source': 'rtmp://172.17.0.1/vod2/cars.mp4',
             'resolution': '640x480',
             'fps': '3',
             'buffer_stream_key': 'buffer-stream-key1',
+            'query_ids': ['query-id1', 'query-id2'],
         }
     )
     msg_2 = new_action_msg(
         'startPreprocessing',
         {
             'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
-            'source': 'rtmp://localhost/live/mystream',
+            'source': 'rtmp://localhost/vod2/cars.mp4',
             'resolution': '320x240',
             'fps': '15',
             'buffer_stream_key': 'buffer-stream-key2',
+            'query_ids': ['query-id3'],
         }
     )
     msg_3 = new_action_msg(
         'startPreprocessing',
         {
             'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
-            'source': 'rtmp://localhost/live/mystream',
+            'source': 'rtmp://localhost/vod2/cars.mp4',
             'resolution': '640x480',
             'fps': '30',
             'buffer_stream_key': 'buffer-stream-key3',
+            'query_ids': ['query-id4'],
         }
     )
     msg_4 = new_action_msg(

@@ -3,13 +3,15 @@ import json
 
 class EventVEkgMessage():
 
-    def __init__(self, id=None, publisher_id=None, source=None, image_url=None, vekg=None, json_msg=None):
+    def __init__(
+            self, id=None, publisher_id=None, source=None, image_url=None, vekg=None, query_ids=None, json_msg=None):
         self.dict = {
             'id': id,
             'publisher_id': publisher_id,
             'source': source,
             'image_url': image_url,
             'vekg': vekg,
+            'query_ids': query_ids
         }
         self.json_serialized = json_msg
 

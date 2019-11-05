@@ -53,6 +53,7 @@ class PublishToBuffer():
                 scope.span.set_tag(tag, value)
             event_schema.dict = self.inject_current_tracer_into_event_data(event_schema.dict)
             msg_json = event_schema.json_msg_load_from_dict()
+            print(event_schema.dict)
             self.stream.write_events(msg_json)
 
     def start(self):
@@ -67,7 +68,7 @@ class PublishToBuffer():
 
 
 def run_stream_to_buffer(
-        stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, ffmpeg, expiration_time, tracer_configs):
+        stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, query_ids, ffmpeg, expiration_time, tracer_configs):
     redis_fs_cli_config = {
         'host': REDIS_ADDRESS,
         'port': REDIS_PORT,
@@ -76,7 +77,7 @@ def run_stream_to_buffer(
     sub_service_name = 'PreProcessing'
     tracer = init_tracer(sub_service_name, **tracer_configs)
     event_generator = ImageUploadFromRTMPEventGenerator(
-        redis_fs_cli_config, publisher_id, media_source, width, height, fps, ffmpeg, expiration_time)
+        redis_fs_cli_config, publisher_id, media_source, width, height, fps, query_ids, ffmpeg, expiration_time)
     pub_buffer = PublishToBuffer(buffer_stream_key, stream_factory, event_generator, tracer)
     pub_buffer.start()
 
@@ -90,6 +91,7 @@ def main():
     height = int(sys.argv[4])
     fps = int(sys.argv[5])
     buffer_stream_key = sys.argv[6]
+    query_ids = sys.argv[7].split(',')
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
     tracer_configs = {
         'reporting_host': TRACER_REPORTING_HOST,
@@ -97,7 +99,7 @@ def main():
     }
     try:
         run_stream_to_buffer(
-            stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, FFMPEG_BIN, REDIS_EXPIRATION_TIME, tracer_configs)
+            stream_factory, publisher_id, media_source, width, height, fps, buffer_stream_key, query_ids, FFMPEG_BIN, REDIS_EXPIRATION_TIME, tracer_configs)
     except KeyboardInterrupt:
         pass
 

@@ -25,16 +25,21 @@ class PreProcessing(BaseTracerService):
         self.stream_to_buffers_bin = stream_to_buffers_bin
         self.buffers = {}
 
-    def _prepare_subprocess_arglist(self, publisher_id, source, resolution, fps, buffer_stream_key):
+    def _prepare_subprocess_arglist(self, publisher_id, source, resolution, fps, buffer_stream_key, query_ids):
+        comma_separated_query_ids = ','.join(query_ids)
         width, height = resolution.split('x')
-        return ['python', self.stream_to_buffers_bin, publisher_id, source, width, height, str(fps), buffer_stream_key]
+        return [
+            'python', self.stream_to_buffers_bin, publisher_id, source, width, height, str(
+                fps), buffer_stream_key, comma_separated_query_ids
+        ]
 
     def _run_subprocess(self, *args):
         self.logger.debug(f'Starting subprocess with args: {args}')
         p = subprocess.Popen(*args)
         return p
 
-    def start_preprocessing_for_buffer_stream(self, publisher_id, source, resolution, fps, buffer_stream_key):
+    def start_preprocessing_for_buffer_stream(
+            self, publisher_id, source, resolution, fps, buffer_stream_key, query_ids):
         # source = 'rtmp://localhost/live/mystream'
         # frame_skip_n = 5
         # url, frame_skip_n = action.split('-')
@@ -45,9 +50,10 @@ class PreProcessing(BaseTracerService):
             'resolution': resolution,
             'fps': fps,
             'buffer_stream_key': buffer_stream_key,
+            'query_ids': query_ids
         }
         self.logger.info(f'Starting preprocessing for: {buffer_stream_key}. Buffer data: {preprocessing_data}')
-        arg_list = self._prepare_subprocess_arglist(publisher_id, source, resolution, fps, buffer_stream_key)
+        arg_list = self._prepare_subprocess_arglist(publisher_id, source, resolution, fps, buffer_stream_key, query_ids)
         p = self._run_subprocess(arg_list)
         preprocessing_data['subprocess'] = p
         self.buffers.update({buffer_stream_key: preprocessing_data})
@@ -68,7 +74,9 @@ class PreProcessing(BaseTracerService):
             resolution = event_data['resolution']
             fps = event_data['fps']
             buffer_stream_key = event_data['buffer_stream_key']
-            self.start_preprocessing_for_buffer_stream(publisher_id, source, resolution, fps, buffer_stream_key)
+            query_ids = event_data['query_ids']
+            self.start_preprocessing_for_buffer_stream(
+                publisher_id, source, resolution, fps, buffer_stream_key, query_ids)
         elif action == 'stopPreprocessing':
             buffer_stream_key = event_data['buffer_stream_key']
             self.stop_preprocessing_for_buffer_stream(buffer_stream_key)
