@@ -43,17 +43,18 @@ class PublishToBuffer():
 
     def publish_next_event(self):
         event_schema = self.event_generator.next_event()
-        tracer_tags = {
-            tags.MESSAGE_BUS_DESTINATION: self.buffer_stream_key,
-            tags.SPAN_KIND: tags.SPAN_KIND_PRODUCER,
-            EVENT_ID_TAG: event_schema.dict['id'],
-        }
-        with self.tracer.start_active_span('publish_next_event', child_of=None) as scope:
-            for tag, value in tracer_tags.items():
-                scope.span.set_tag(tag, value)
-            event_schema.dict = self.inject_current_tracer_into_event_data(event_schema.dict)
-            msg_json = event_schema.json_msg_load_from_dict()
-            self.stream.write_events(msg_json)
+        if event_schema is not None:
+            tracer_tags = {
+                tags.MESSAGE_BUS_DESTINATION: self.buffer_stream_key,
+                tags.SPAN_KIND: tags.SPAN_KIND_PRODUCER,
+                EVENT_ID_TAG: event_schema.dict['id'],
+            }
+            with self.tracer.start_active_span('publish_next_event', child_of=None) as scope:
+                for tag, value in tracer_tags.items():
+                    scope.span.set_tag(tag, value)
+                event_schema.dict = self.inject_current_tracer_into_event_data(event_schema.dict)
+                msg_json = event_schema.json_msg_load_from_dict()
+                self.stream.write_events(msg_json)
 
     def start(self):
         try:

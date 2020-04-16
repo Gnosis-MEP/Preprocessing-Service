@@ -10,13 +10,14 @@ import cv2
 class FFMPEGReader():
     """docstring for FFMPEGReader"""
 
-    def __init__(self, media_source, width, height, fps, ffmpeg='ffmpeg'):
+    def __init__(self, media_source, width, height, fps, logger, ffmpeg='ffmpeg'):
         super(FFMPEGReader, self).__init__()
         self.ffmpeg = ffmpeg
         self.media_source = media_source
         self.width = width
         self.height = height
         self.fps = fps
+        self.logger = logger
         self.cmd = self.prepare_cmd()
         self.bufsize = 10**8
         self.subprocess = self.open_subprocess_pipe(self.cmd)
@@ -37,18 +38,18 @@ class FFMPEGReader():
         return command
 
     def open_subprocess_pipe(self, cmd):
-        pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=self.bufsize)
-        return pipe
+        return subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=self.bufsize)
 
     def read(self):
         raw_image = self.subprocess.stdout.read(self.width * self.height * 3)
         self.subprocess.stdout.flush()
         # transform the byte read into a numpy array
         image = numpy.fromstring(raw_image, dtype='uint8')
-        image = image.reshape((self.height, self.width, 3))
-        if image is None:
-            return False, []
-        return True, image
+        if image.size == 0:
+            return False, None
+        else:
+            return True, image.reshape((self.height, self.width, 3))
+
 
     def isOpened(self):
         return self.subprocess.poll() is None

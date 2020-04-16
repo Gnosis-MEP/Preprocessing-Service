@@ -41,15 +41,16 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
         self.fps = fps
         self.query_ids = query_ids
         self.expiration_time = expiration_time
+        self.color_channels = 'BGR'
+        self.logger = setup_logger(self.__class__.__name__)
         self.reader = FFMPEGReader(
             media_source=media_source,
             width=self.width,
             height=self.height,
             fps=self.fps,
+            logger=self.logger,
             ffmpeg=ffmpeg_bin
         )
-        self.color_channels = 'BGR'
-        self.logger = setup_logger(self.__class__.__name__)
 
         BaseEventGenerator.__init__(
             self, source=publisher_id, event_schema=EventVEkgMessage)
@@ -58,35 +59,30 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
     def upload_inmemory_to_storage(self, img_numpy_array):
         return super(ImageUploadFromRTMPEventGenerator, self).upload_inmemory_to_storage(img_numpy_array)
 
-    @timer_logger
     def next_event(self):
         try:
-            if self.reader.isOpened():
-                ret, frame = self.reader.read()
-                while not ret:
-                    self.logger.error(f'Bad return reading frame from {self.reader}, will sleep a bit and try again')
-                    time.sleep(0.1)
-                    ret, frame = self.reader.read()
+            schema = None
+            return_flag, frame = self.reader.read()
+            if not return_flag:
+                self.logger.error(f'Bad return reading frame from {self.reader} retrying for next one.' )
+            if return_flag:
+                # cv2.imshow(f'{self.media_source}-{self.fps}-{self.width}x{self.height}', frame)
+                # cv2.waitKey(1)
+                event_id = f'{self.source}-{str(uuid.uuid4())}'
+                obj_data = self.upload_inmemory_to_storage(frame)
 
-                if ret:
-                    # cv2.imshow(f'{self.media_source}-{self.fps}-{self.width}x{self.height}', frame)
-                    # cv2.waitKey(1)
-                    event_id = f'{self.source}-{str(uuid.uuid4())}'
-                    obj_data = self.upload_inmemory_to_storage(frame)
-
-                    img_url = obj_data
-                    schema = self.event_schema(
-                        id=event_id, vekg={}, image_url=img_url,
-                        publisher_id=self.publisher_id, source=self.media_source,
-                        query_ids=self.query_ids
-                    )
-                    schema.dict.update({
-                        'width': self.width,
-                        'height': self.height,
-                        'color_channels': self.color_channels
-                    })
-
-                    return schema
+                img_url = obj_data
+                schema = self.event_schema(
+                    id=event_id, vekg={}, image_url=img_url,
+                    publisher_id=self.publisher_id, source=self.media_source,
+                    query_ids=self.query_ids
+                )
+                schema.dict.update({
+                    'width': self.width,
+                    'height': self.height,
+                    'color_channels': self.color_channels
+                })
+            return schema
         except Exception as e:
             self.reader.close()
             raise e
