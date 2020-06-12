@@ -27,9 +27,9 @@ def send_msgs(service_stream):
         'startPreprocessing',
         {
             'publisher_id': '44d7985a-e41e-4d02-a772-a8f7c1c69124',
-            'source': 'rtmp://172.17.0.1/vod2/cars.mp4',
-            'resolution': '640x480',
-            'fps': '3',
+            'source': '/home/arruda/projects/gnosis/preprocessing-service/datatemp',
+            'resolution': '300x300',
+            'fps': '5',
             'buffer_stream_key': 'buffer-stream-key1',
             'query_ids': ['query-id1', 'query-id2'],
         }

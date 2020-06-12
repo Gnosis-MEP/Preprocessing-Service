@@ -5,7 +5,8 @@ from decouple import config
 SOURCE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SOURCE_DIR)
 
-RUN_STREAM_TO_BUFFERS = os.path.join(SOURCE_DIR, 'run_stream_to_buffer.py')
+RUN_STREAM_TO_BUFFER_SCRIPT = config('RUN_STREAM_TO_BUFFER_SCRIPT', default='run_stream_to_buffer.py')
+RUN_STREAM_TO_BUFFERS = os.path.join(SOURCE_DIR, RUN_STREAM_TO_BUFFER_SCRIPT)
 
 REDIS_ADDRESS = config('REDIS_ADDRESS', default='localhost')
 REDIS_PORT = config('REDIS_PORT', default='6379')

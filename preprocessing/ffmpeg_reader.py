@@ -1,5 +1,8 @@
-import time
+import glob
+import os
 import subprocess
+import time
+
 import numpy
 
 import cv2
@@ -110,3 +113,41 @@ class OCVBasedFFMPEGReader():
     def close(self):
         self.capture.release()
         # self.subprocess.kill()
+
+
+class OCVLocalImagesReader():
+    """docstring for OCVBasedFFMPEGReader"""
+
+    def __init__(self, images_dir, width, height, fps):
+        super(OCVLocalImagesReader, self).__init__()
+        self.images_dir = images_dir
+        self.width = width
+        self.height = height
+        self.fps = fps
+        self.sleep_fps_enforce_time = (1 / fps) * 0.98
+        self.images_abs_paths = self.get_images_paths()
+        self.next_image_index = 0
+
+    def get_images_paths(self):
+        images_abs_paths = []
+        images_dir_extensions = os.path.join(self.images_dir, '*.jpeg')
+        for image_file in glob.glob(images_dir_extensions):
+            images_abs_paths.append(image_file)
+        return images_abs_paths
+
+    def read(self):
+        time.sleep(self.sleep_fps_enforce_time)
+        if not self.isOpened():
+            return False, []
+        next_image_path = self.images_abs_paths[self.next_image_index]
+        next_image = cv2.imread(next_image_path)
+        resized_image = cv2.resize(
+            next_image, (self.height, self.width), interpolation=cv2.INTER_CUBIC)
+        self.next_image_index += 1
+        return True, resized_image
+
+    def isOpened(self):
+        return self.next_image_index < len(self.images_abs_paths)
+
+    def close(self):
+        self.next_image_index = len(self.images_abs_paths)
