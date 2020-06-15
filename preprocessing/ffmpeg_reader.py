@@ -130,7 +130,7 @@ class OCVLocalImagesReader():
 
     def get_images_paths(self):
         images_abs_paths = []
-        images_dir_extensions = os.path.join(self.images_dir, '*.jpeg')
+        images_dir_extensions = os.path.join(self.images_dir, '*.jpg')
         for image_file in glob.glob(images_dir_extensions):
             images_abs_paths.append(image_file)
         return images_abs_paths
