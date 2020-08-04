@@ -1,3 +1,4 @@
+import datetime
 import glob
 import os
 import subprocess
@@ -124,9 +125,21 @@ class OCVLocalImagesReader():
         self.width = width
         self.height = height
         self.fps = fps
-        self.sleep_fps_enforce_time = (1 / fps) * 0.98
+        self.frame_time = 1 / fps
         self.images_abs_paths = self.get_images_paths()
         self.next_image_index = 0
+        self.last_read_timestamp = datetime.datetime.now().timestamp()
+
+    def sleep_remaining_sleep_for_fps(self):
+        current_timestamp = datetime.datetime.now().timestamp()
+        secs_since_last_read = current_timestamp - self.last_read_timestamp
+        missing_sleep_time = self.frame_time - secs_since_last_read
+        if missing_sleep_time > 0:
+            time.sleep(missing_sleep_time)
+        else:
+            missing_sleep_time = 0
+
+        self.last_read_timestamp = current_timestamp + missing_sleep_time
 
     def get_images_paths(self):
         images_abs_paths = []
@@ -136,7 +149,6 @@ class OCVLocalImagesReader():
         return images_abs_paths
 
     def read(self):
-        time.sleep(self.sleep_fps_enforce_time)
         if not self.isOpened():
             return False, []
         next_image_path = self.images_abs_paths[self.next_image_index]
@@ -144,6 +156,7 @@ class OCVLocalImagesReader():
         resized_image = cv2.resize(
             next_image, (self.height, self.width), interpolation=cv2.INTER_CUBIC)
         self.next_image_index += 1
+        self.sleep_remaining_sleep_for_fps()
         return True, resized_image
 
     def isOpened(self):
