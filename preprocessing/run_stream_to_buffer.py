@@ -89,7 +89,7 @@ def main():
     media_source = sys.argv[2]
     width = int(sys.argv[3])
     height = int(sys.argv[4])
-    fps = int(sys.argv[5])
+    fps = float(sys.argv[5])
     buffer_stream_key = sys.argv[6]
     query_ids = sys.argv[7].split(',')
     stream_factory = RedisStreamFactory(host=REDIS_ADDRESS, port=REDIS_PORT)
