@@ -48,6 +48,7 @@ class PublishToBuffer():
                 tags.MESSAGE_BUS_DESTINATION: self.buffer_stream_key,
                 tags.SPAN_KIND: tags.SPAN_KIND_PRODUCER,
                 EVENT_ID_TAG: event_schema.dict['id'],
+                'frame_index': event_schema.dict['frame_index']
             }
             with self.tracer.start_active_span('publish_next_event', child_of=None) as scope:
                 for tag, value in tracer_tags.items():
