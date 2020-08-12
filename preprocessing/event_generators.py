@@ -80,7 +80,8 @@ class ImageUploadFromRTMPEventGenerator(BaseEventGenerator, RedisImageCache):
                 schema.dict.update({
                     'width': self.width,
                     'height': self.height,
-                    'color_channels': self.color_channels
+                    'color_channels': self.color_channels,
+                    'frame_index': self.reader.current_frame_index
                 })
             return schema
         except Exception as e:

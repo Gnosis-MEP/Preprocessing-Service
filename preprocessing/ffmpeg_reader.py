@@ -24,6 +24,7 @@ class FFMPEGReader():
         self.logger = logger
         self.cmd = self.prepare_cmd()
         self.bufsize = 10**8
+        self.current_frame_index = -1
         self.subprocess = self.open_subprocess_pipe(self.cmd)
 
     def prepare_cmd(self):
@@ -52,8 +53,8 @@ class FFMPEGReader():
         if image.size == 0:
             return False, None
         else:
+            self.current_frame_index += 1
             return True, image.reshape((self.height, self.width, 3))
-
 
     def isOpened(self):
         return self.subprocess.poll() is None
