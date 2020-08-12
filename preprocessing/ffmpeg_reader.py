@@ -31,10 +31,10 @@ class FFMPEGReader():
             self.ffmpeg,
             # '-analyzeduration', '17777', '-probesize', '32',
             # '-fflags', 'nobuffer',
+            '-r', f'{self.fps}',
             '-i', self.media_source,
             '-pix_fmt', 'bgr24',      # opencv requires bgr24 pixel format.
             '-vcodec', 'rawvideo',
-            '-r', f'{self.fps}',
             '-s', f'{self.width}x{self.height}',
             '-an', '-sn',              # we want to disable audio processing (there is no audio)
             '-f', 'image2pipe', '-'
@@ -80,11 +80,11 @@ class OCVBasedFFMPEGReader():
     def prepare_cmd(self):
         command = [
             self.ffmpeg,
+            '-r', f'{self.fps}',
             '-f', 'video4linux2',
             '-i', self.media_source,
             '-c:v', 'libx264',
             '-f', 'flv',
-            '-r', f'{self.fps}',
             '-s', f'{self.width}x{self.height}',
             '-an', '-sn',              # we want to disable audio processing (there is no audio)
             '-f', 'pipe:1', '>', 'fifo'
