@@ -6,7 +6,7 @@ services:
       - "6379:6379"
 
   service:
-    image: registry.insight-centre.org/sit/mps/preprocessing-service:latest
+    image: registry.insight-centre.org/sit/mps/felipe-phd/preprocessing-service:latest
     command: echo "ok"
     build:
       context: '.'
