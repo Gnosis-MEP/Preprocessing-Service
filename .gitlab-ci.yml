@@ -7,7 +7,8 @@ stages:
 
 variables:
   SERVICE_STREAM_KEY: pp-data
-  SERVICE_CMD_KEY: pp-cmd
+  LISTEN_EVENT_TYPE_QUERY_CREATED: QueryCreated
+  LISTEN_EVENT_TYPE_QUERY_REMOVED: QueryRemoved
   LOGGING_LEVEL: DEBUG
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
