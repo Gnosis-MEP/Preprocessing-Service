@@ -1,14 +1,15 @@
 import subprocess
 
-from event_service_utils.services.tracer import BaseTracerService
+from event_service_utils.services.event_driven import BaseEventDrivenCMDService
 from event_service_utils.tracing.jaeger import init_tracer
 
 
-class PreProcessing(BaseTracerService):
+class PreProcessing(BaseEventDrivenCMDService):
     def __init__(self,
-                 service_stream_key, service_cmd_key,
-                 stream_to_buffers_bin,
+                 service_stream_key, service_cmd_key_list,
+                 pub_event_list, service_details,
                  stream_factory,
+                 stream_to_buffers_bin,
                  logging_level,
                  tracer_configs):
 
@@ -16,7 +17,9 @@ class PreProcessing(BaseTracerService):
         super(PreProcessing, self).__init__(
             name=self.__class__.__name__,
             service_stream_key=service_stream_key,
-            service_cmd_key=service_cmd_key,
+            service_cmd_key_list=service_cmd_key_list,
+            pub_event_list=pub_event_list,
+            service_details=service_details,
             stream_factory=stream_factory,
             logging_level=logging_level,
             tracer=tracer,
@@ -27,7 +30,7 @@ class PreProcessing(BaseTracerService):
 
     def _prepare_subprocess_arglist(self, publisher_id, source, resolution, fps, buffer_stream_key, query_ids):
         comma_separated_query_ids = ','.join(query_ids)
-        width, height = resolution.split('x')
+        width, height = resolution.lower().split('x')
         return [
             'python', self.stream_to_buffers_bin, publisher_id, source, width, height, str(
                 fps), buffer_stream_key, comma_separated_query_ids
@@ -35,7 +38,8 @@ class PreProcessing(BaseTracerService):
 
     def _run_subprocess(self, *args):
         self.logger.debug(f'Starting subprocess with args: {args}')
-        p = subprocess.Popen(*args)
+        # p = subprocess.Popen(*args)
+        p = None
         return p
 
     def start_preprocessing_for_buffer_stream(
@@ -63,22 +67,29 @@ class PreProcessing(BaseTracerService):
         if preprocessing_data:
             self.logger.info(f'Stoping preprocessing for: {buffer_stream_key}. Buffer data: {preprocessing_data}')
             subprocess = preprocessing_data['subprocess']
-            subprocess.kill()
+            # subprocess.kill()
 
-    def process_action(self, action, event_data, json_msg):
-        if not super(PreProcessing, self).process_action(action, event_data, json_msg):
+    def process_event_type(self, event_type, event_data, json_msg):
+        if not super(PreProcessing, self).process_event_type(event_type, event_data, json_msg):
             return False
-        if action == 'startPreprocessing':
-            publisher_id = event_data['publisher_id']
-            source = event_data['source']
-            resolution = event_data['resolution']
-            fps = event_data['fps']
-            buffer_stream_key = event_data['buffer_stream_key']
-            query_ids = event_data['query_ids']
+
+        if event_type == 'QueryCreated':
+            buffer_stream = event_data['buffer_stream']
+            publisher_id = buffer_stream['publisher_id']
+            source = buffer_stream['source']
+            resolution = buffer_stream['resolution']
+            fps = buffer_stream['fps']
+            buffer_stream_key = buffer_stream['buffer_stream_key']
+            # for now only considers one query per bufferstream
+            # at some point a change in the preprocesssor has to be done
+            # to facilitate updating the ffmpeg sub-process update to add new query ids
+            # to the published events.
+            query_ids = [event_data['query_id']]
             self.start_preprocessing_for_buffer_stream(
                 publisher_id, source, resolution, fps, buffer_stream_key, query_ids)
-        elif action == 'stopPreprocessing':
-            buffer_stream_key = event_data['buffer_stream_key']
+        elif event_type == 'QueryRemoved':
+            buffer_stream = event_data['buffer_stream']
+            buffer_stream_key = buffer_stream['buffer_stream_key']
             self.stop_preprocessing_for_buffer_stream(buffer_stream_key)
 
     def log_state(self):
