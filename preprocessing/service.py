@@ -67,7 +67,7 @@ class PreProcessing(BaseEventDrivenCMDService):
         if preprocessing_data:
             self.logger.info(f'Stoping preprocessing for: {buffer_stream_key}. Buffer data: {preprocessing_data}')
             subprocess = preprocessing_data['subprocess']
-            # subprocess.kill()
+            subprocess.kill()
 
     def process_event_type(self, event_type, event_data, json_msg):
         if not super(PreProcessing, self).process_event_type(event_type, event_data, json_msg):
