@@ -38,8 +38,7 @@ class PreProcessing(BaseEventDrivenCMDService):
 
     def _run_subprocess(self, *args):
         self.logger.debug(f'Starting subprocess with args: {args}')
-        # p = subprocess.Popen(*args)
-        p = None
+        p = subprocess.Popen(*args)
         return p
 
     def start_preprocessing_for_buffer_stream(
