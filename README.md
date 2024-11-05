@@ -1,55 +1,19 @@
 # Preprocessing Service
-This service is responsible doing the preprocessing of the publishers streams.
-It takes one publisher stream as source, and generate the events with each frame into our system, based on a specific FPS and resolution.
+This service is responsible doing the preprocessing of the publishers streams from external media servers.
+It takes one publisher stream as source, and generate the data events (VEKG) with each frame into our system, based on a specific FPS and resolution of the input source.
 
-# Commands Stream
-## Inputs
+# Events Listened
+ - [QUERY_CREATED](https://github.com/Gnosis-MEP/Gnosis-Docs/blob/main/EventTypes.md#QUERY_CREATED)
+ - [QUERY_REMOVED](https://github.com/Gnosis-MEP/Gnosis-Docs/blob/main/EventTypes.md#QUERY_REMOVED)
 
-### startPreprocessing
-```json
-{
-    "id": "abc-123abc-123abc-123abc-123abc-123abc-123",
-    "action": "startPreprocessing",
-    "publisher_id": "44d7985a-e41e-4d02-a772-a8f7c1c69124",
-    "source": "rtmp://localhost/live/mystream",
-    "resolution": "640x480",
-    "fps": "30",
-    "buffer_stream_key": "buffer-stream-key",
-    "query_ids": ["query-id1", "query-id2"]
-}
-```
+# Events Published
+ - [VEKG](https://github.com/Gnosis-MEP/Gnosis-Docs/blob/main/EventTypes.md#VEKG)
 
-### stopPreprocessing
-```json
-{
-    "id": "abc-123abc-123abc-123abc-123abc-123abc-123",
-    "action": "stopPreprocessing",
-    "buffer_stream_key": "buffer-stream-key"
-}
-```
-## Outputs
-None
-
-# Data Stream
-Generate event data with the following fields, as the following example:
-```json
-{
-    "id": "publisher-id-2-6c80a860-6a08-4d22-a9b9-9acf7016b863",
-    "publisher_id": "publisher-id-2",
-    "source": "rtmp://172.17.0.1/live/mystream",
-    "image_url": "c8d025d3-8c3a-460c-a6f5-cabb7b179807",
-    "vekg": {},
-    "width": 640,
-    "height": 480,
-    "color_channels": "BGR",
-    "query_ids": ["query-id1", "query-id2"]
-}
-```
 
 # Installation
 
 ## Configure .env
-Copy the `example.env` file to `.env`, and inside it replace `SIT_PYPI_USER` and `SIT_PYPI_PASS` with the correct information.
+Copy the `example.env` file to `.env`, and inside it replace the variables with the values you need.
 
 ## Installing Dependencies
 
@@ -61,19 +25,19 @@ This runs the installation using **pip** under the hood, but also handle the cro
 
 
 ### Using pip
-To install using pip directly, one needs to use the `--extra-index-url` when running the `pip install` command, in order for to be able to use our private Pypi repository.
-
-Load the environment variables from `.env` file using `source load_env.sh`.
-
 To install from the `requirements.txt` file, run the following command:
 ```
-$ pip install --extra-index-url https://${SIT_PYPI_USER}:${SIT_PYPI_PASS}@sit-pypi.herokuapp.com/simple -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
 # Running
-Inside the python environment (virtualenv or conda environment), run:
+Enter project python environment (virtualenv or conda environment)
+
+**ps**: It's required to have the .env variables loaded into the shell so that the project can run properly. An easy way of doing this is using `pipenv shell` to start the python environment with the `.env` file loaded or using the `source load_env.sh` command inside your preferable python environment (eg: conda).
+
+Then, run the service with:
 ```
-$ ./preprocessing/.run.py
+$ ./preprocessing/run.py
 ```
 
 # Testing
@@ -91,3 +55,5 @@ Build the docker image using: `docker-compose build`
 ## Run
 Use `docker-compose run --rm service` to run the docker image
 
+## Benchmark Tests
+To run the benchmark tests one needs to manually start the Benchmark stage in the CI pipeline (Gitlab), it shoud be enabled after the tests stage is done. Only by passing the benchmark tests shoud the image be tagged with 'latest', to show that it is a stable docker image.
